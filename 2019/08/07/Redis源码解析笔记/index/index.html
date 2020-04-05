@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>Redis源码解析笔记 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Wednesday, August 7th 2019, 10:55 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    4.5k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      19 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="Redis源码解析笔记"><a href="#Redis源码解析笔记" class="headerlink" title="Redis源码解析笔记"></a>Redis源码解析笔记</h1><p>学习redis源码顺便学下C</p>
+<h2 id="数据类型与结构"><a href="#数据类型与结构" class="headerlink" title="数据类型与结构"></a>数据类型与结构</h2><h3 id="简单动态字符串-SDS-Simple-Dynamic-String"><a href="#简单动态字符串-SDS-Simple-Dynamic-String" class="headerlink" title="简单动态字符串(SDS, Simple Dynamic String)"></a>简单动态字符串(SDS, Simple Dynamic String)</h3><p>结构体基本定义</p>
+<pre><code class="c">struct __attribute__ ((__packed__)) sdshdr64 {
+    uint64_t len; /* used */
+    uint64_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};</code></pre>
+<p><code>__attribute__</code>用来在函数或数据声明中设置其属性(函数属性 变量属性 类型属性) 这些参数用来对编译器的优化进行调整和设置 括号内为其参数 <code>__attribute__ ((__packed__))</code>宏用来取消C编译器对结构体进行对齐优化 通常情况下 结构体按照所有变量大小的最小公倍数做数字对齐 用<code>packed</code>修饰后 则变为按1字节对齐 在这里这样设置可以减少每个sds结构体的内存占用</p>
+<p>同样出于提高内存利用率的考虑 <code>sds.h</code>中定义了5种sds结构体 最小的为其使用于创建长度小于32字节的字符串 可以看到其直接省略到了<code>len</code>和<code>alloc</code>字段 字符串的长度直接用flags字段的后5位表示</p>
+<pre><code class="c">struct __attribute__ ((__packed__)) sdshdr5 {
+    unsigned char flags; /* 3 lsb of type, and 5 msb of string length */
+    char buf[];
+};</code></pre>
+<p>通过<code>char buf[]</code>来实现扩容方便且二进制安全的字符串(考虑C语言中以<code>\0</code>作为字符串终止的标志由此带来的一系列问题) <code>len</code>记录已用长度 <code>alloc</code>记录总分配长度  <code>flags</code>的低3位记录类型 高5位保留</p>
+<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul>
+<li><p>创建字符串</p>
+<p>  <code>sds sdsnewlen(const void *init, size_t initlen)</code>其直接返回sds结构体的<code>buf</code>指针 <code>buf=sh+hdrlen</code> sh是为结构体变量起始地址 hdrlen是对应sds类型的header长度 header长度指除buf以外的结构体字段总长 注意sdshdr5 会被转化为sdshdr8<br>  而<code>sh = s_malloc(hdrlen+initlen+1);</code>是为了算上末尾的<code>\0</code></p>
+</li>
+<li><p>释放字符串</p>
+<ul>
+<li>提供了两种方式<code>void sdsfree(sds s)</code>直接释放内存</li>
+<li>sdsclear<pre><code class="c">void sdsclear(sds s) {
+sdssetlen(s, 0);
+s[0] = &#39;\0&#39;;
+}</code></pre>
+重置统计值达到清空目的 该方法仅仅讲sds的<code>len</code>字段归0</li>
+</ul>
+</li>
+<li><p>拼接字符串</p>
+</li>
+</ul>
+<p><img src="/img/redis_sds_cat.png" srcset="/img/loading.gif" alt="sdscat"></p>
+<p>sdsMakeRoomFor最后对类型的判断 如果类型没有发生变化就对原sds调用realloc 否则直接调用malloc重新分配内存</p>
+<p>关于<code>realloc</code>函数</p>
+<p><code>realloc(void *__ptr, size_t __size)</code>：更改已经配置的内存空间，即更改由malloc()函数分配的内存空间的大小。</p>
+<p>如果将分配的内存减少，realloc仅仅是改变索引的信息。</p>
+<p>如果是将分配的内存扩大，则有以下情况：<br>1）如果当前内存段后面有需要的内存空间，则直接扩展这段内存空间，realloc()将返回原指针。<br>2）如果当前内存段后面的空闲字节不够，那么就使用堆中的第一个能够满足这一要求的内存块，将目前的数据复制到新的位置，并将原来的数据块释放掉，返回新的内存块位置。<br>3）如果申请失败，将返回NULL，此时，原来的指针仍然有效。</p>
+<h3 id="有序集合–跳跃表"><a href="#有序集合–跳跃表" class="headerlink" title="有序集合–跳跃表"></a>有序集合–跳跃表</h3><p><img src="/img/ds_skiplist.jpg" srcset="/img/loading.gif" alt="sl"></p>
+<p>跳跃表性质:</p>
+<p>(1) 由很多层结构组成</p>
+<p>(2) 每一层都是一个有序的链表</p>
+<p>(3) 最底层(Level 1)的链表包含所有元素</p>
+<p>(4) 如果一个元素出现在 Level i 的链表中，则它在 Level i 之下的链表也都会出现。</p>
+<p>(5) 每个节点包含两个指针，一个指向同一链表中的下一个元素，一个指向下面一层的元素。</p>
+<p>(6) 每层结构包含指向本层下一个节点的指针 指向本层下个节点中间所跨越的节点个数为本层的<code>跨度(span)</code></p>
+<p>相比于平衡树 跳跃表实现更加简单 但是牺牲了一定的空间来达到快速查找的目的 其查询插入删除操作复杂度均为<strong>O(logN)</strong></p>
+<p>redis中的跳跃表节点定义:</p>
+<pre><code class="c">typedef struct zskiplistNode {
+    sds ele;//存储字符类型的数据
+    double score;// 存储排序的分值
+    struct zskiplistNode *backward;// 指向最底层的本节点的前一个节点 用于从后向前遍历时
+    struct zskiplistLevel {
+        struct zskiplistNode *forward;//指向本层的下一个节点
+        unsigned long span;
+    } level[];
+} zskiplistNode;</code></pre>
+<p>跳跃表以及有序集合结构定义:</p>
+<pre><code class="c">typedef struct zskiplist {
+    struct zskiplistNode *header, *tail;
+    unsigned long length;
+    int level;
+} zskiplist;
+
+typedef struct zset {
+    dict *dict;
+    zskiplist *zsl;
+} zset;</code></pre>
+<h4 id="基本操作-1"><a href="#基本操作-1" class="headerlink" title="基本操作"></a>基本操作</h4><ul>
+<li>插入</li>
+</ul>
+<p>参见t_set.c的<code>zskiplistNode *zslInsert(zskiplist *zsl, double score, sds ele)</code>函数</p>
+<pre><code class="c">zskiplistNode *zslInsert(zskiplist *zsl, double score, sds ele) {
+    zskiplistNode *update[ZSKIPLIST_MAXLEVEL], *x;
+    unsigned int rank[ZSKIPLIST_MAXLEVEL];
+    int i, level;
+
+    serverAssert(!isnan(score));
+    x = zsl-&gt;header;
+    for (i = zsl-&gt;level-1; i &gt;= 0; i--) {
+        /* store rank that is crossed to reach the insert position */
+        rank[i] = i == (zsl-&gt;level-1) ? 0 : rank[i+1];
+        while (x-&gt;level[i].forward &amp;&amp;
+                (x-&gt;level[i].forward-&gt;score &lt; score ||
+                    (x-&gt;level[i].forward-&gt;score == score &amp;&amp;
+                    sdscmp(x-&gt;level[i].forward-&gt;ele,ele) &lt; 0)))
+        {
+            rank[i] += x-&gt;level[i].span;
+            x = x-&gt;level[i].forward;
+        }
+        update[i] = x;
+    }
+    /* we assume the element is not already inside, since we allow duplicated
+     * scores, reinserting the same element should never happen since the
+     * caller of zslInsert() should test in the hash table if the element is
+     * already inside or not. */
+    level = zslRandomLevel();
+    if (level &gt; zsl-&gt;level) {
+        for (i = zsl-&gt;level; i &lt; level; i++) {
+            rank[i] = 0;
+            update[i] = zsl-&gt;header;
+            update[i]-&gt;level[i].span = zsl-&gt;length;
+        }
+        zsl-&gt;level = level;
+    }
+    x = zslCreateNode(level,score,ele);
+    for (i = 0; i &lt; level; i++) {
+        x-&gt;level[i].forward = update[i]-&gt;level[i].forward;
+        update[i]-&gt;level[i].forward = x;
+
+        /* update span covered by update[i] as x is inserted here */
+        x-&gt;level[i].span = update[i]-&gt;level[i].span - (rank[0] - rank[i]);
+        update[i]-&gt;level[i].span = (rank[0] - rank[i]) + 1;
+    }
+
+    /* increment span for untouched levels */
+    for (i = level; i &lt; zsl-&gt;level; i++) {
+        update[i]-&gt;level[i].span++;
+    }
+
+    x-&gt;backward = (update[0] == zsl-&gt;header) ? NULL : update[0];
+    if (x-&gt;level[0].forward)
+        x-&gt;level[0].forward-&gt;backward = x;
+    else基本操作
+        zsl-&gt;tail = x;
+    zsl-&gt;length++;
+    return x;
+}</code></pre>
+<p>大概是3步</p>
+<ol>
+<li>找到每一层该节点应插入的位置 用rank和update数组记录每层的步长和节点</li>
+<li>插入节点的高度随机决定 调整跳跃表的高度</li>
+<li>插入节点</li>
+</ol>
+<ul>
+<li>删除</li>
+</ul>
+<p>以后再说。。。</p>
+<h4 id="跳跃表在Redis中的应用"><a href="#跳跃表在Redis中的应用" class="headerlink" title="跳跃表在Redis中的应用"></a>跳跃表在Redis中的应用</h4><p>有序集合在Redis中除跳跃表外 还有<strong>压缩列表</strong>的实现方式 创建有序集合时默认采用<strong>压缩列表</strong>的实现 插入元素时 如果压缩列表条目数大于<code>zset-max-ziplist-entries</code>或要插入的字符串长度大于<code>zset-max-ziplist-value</code><br>就会将之转化为跳跃表 这两个参数可以在配置文件中进行配置</p>
+<h3 id="有序集合–压缩列表"><a href="#有序集合–压缩列表" class="headerlink" title="有序集合–压缩列表"></a>有序集合–压缩列表</h3><p>压缩列表本质上就是一个<strong>字节数组</strong></p>
+<p><img src="/img/redis_ziplist_struct.jpg" srcset="/img/loading.gif" alt="zls"></p>
+<p>其中<code>zllen</code>字段记录压缩列表的元素个数 占2字节 因此压缩列表存储的元素最多不能超过65535个</p>
+<p>而<code>entry</code>的结构如下 <strong>| previous_entry_len | encoding | content|</strong> 其中previous_entry_len字段在前一个entry不超过254个字节时占1bytes 超过则占 5bytes 其中第一字节固定为0xFE 后4字节为实际长度</p>
+<ul>
+<li><p>关于string.h中的<code>memmove</code>和<code>memcpy</code></p>
+<p>  二者的作用都是拷贝一定长度的内存的内容 前者允许src和dst的内存区域存在重叠  后者不允许</p>
+</li>
+</ul>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>压缩列表的一个重要的问题在于其插入和删除元素时可能会由于entry的<code>previous_entry_len</code>字段的变动引发级联(连锁)更新 这种更新效率极其低下</p>
+<h3 id="字典-散列表"><a href="#字典-散列表" class="headerlink" title="字典(散列表)"></a>字典(散列表)</h3><p>扩容的时机 在向字典中添加元素时会调用<code>_dictKeyIndex</code>进而调用<code>_dictExpandIfNeeded</code>进行判断</p>
+<p>hash: 把任意长度的输入通过散列算法转化为固定类型固定长度到散列值 hash函数可以把不同键转换成唯一的整数类型 通常具有如下特征</p>
+<ol>
+<li>相同的输入经hash计算后得出相同的输出</li>
+<li>不同的输入经hash计算后一般得出不同输出的值 但也有可能得出相同输出值</li>
+</ol>
+<p>Redis客户端采取<strong>times33</strong>散列函数 核心算法:<code>hash(i) = hash(i-1) * 33 + str[i]</code>来计算字符串的hash值 计算速度快输出值分布较好 redis服务端采取<strong>siphash</strong>算法其对于有规律计算出到键也具有较好的随机分布性但实现较为复杂</p>
+<ul>
+<li>redis中的hash表结构体定义</li>
+</ul>
+<pre><code class="c">/* This is our hash table structure. Every dictionary has two of this as we
+ * implement incremental rehashing, for the old to the new table. */
+typedef struct dictht {
+    dictEntry **table; //指针数组用于存储键值对
+    unsigned long size;//table数组的大小
+    unsigned long sizemask;//掩码=size-1
+    unsigned long used;//table数组已存元素个数 包括next单链表的数据
+} dictht;</code></pre>
+<p>redis中的hash表中的size也始终保持为2的幂次方 以方便将对hash的取余运算转化为位运算 其初始值为4</p>
+<ul>
+<li>redis中的hash表节点定义</li>
+</ul>
+<pre><code class="c">typedef struct dictEntry {
+    void *key;
+    union {
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+        double d;
+    } v;
+    struct dictEntry *next; //hash冲突时指向冲突的元素 形成单链表 采用头插法
+} dictEntry;</code></pre>
+<ul>
+<li>redis中的字典定义</li>
+</ul>
+<pre><code class="c">typedef struct dict {
+    dictType *type;//该字典对应的特定的操作函数
+    void *privdata;//该字典依赖的数据
+    dictht ht[2];//hash表
+    long rehashidx; /* rehashing not in progress if rehashidx == -1  存储的值表示hash表ht0的rehash操作进行到了哪个索引值*/
+    unsigned long iterators; /* number of iterators currently running */
+} dict;</code></pre>
+<ul>
+<li>字典的操作函数定义</li>
+</ul>
+<pre><code class="c">typedef struct dictType {
+    uint64_t (*hashFunction)(const void *key);
+    void *(*keyDup)(void *privdata, const void *key);
+    void *(*valDup)(void *privdata, const void *obj);
+    int (*keyCompare)(void *privdata, const void *key1, const void *key2);
+    void (*keyDestructor)(void *privdata, void *key);
+    void (*valDestructor)(void *privdata, void *obj);
+} dictType;</code></pre>
+<p><img src="/img/redis_dict.jpg" srcset="/img/loading.gif" alt="dict"></p>
+<ul>
+<li>添加元素</li>
+</ul>
+<p>db.c中可见</p>
+<pre><code class="c">void setKey(redisDb *db, robj *key, robj *val) {
+    if (lookupKeyWrite(db,key) == NULL) {
+        dbAdd(db,key,val);
+    } else {
+        dbOverwrite(db,key,val);
+    }
+    incrRefCount(val);
+    removeExpire(db,key);
+    signalModifiedKey(db,key);
+}</code></pre>
+<ol>
+<li>调用dbFind函数查询是否存在不存在则调用<code>dbAdd</code>函数 否则调用<code>dbOverwrite</code>函数添加元素</li>
+<li><code>dbOverwrite</code>最终调用了dict.h中的<code>dictAdd函数</code></li>
+</ol>
+<pre><code class="c">dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing)
+{
+    long index;
+    dictEntry *entry;
+    dictht *ht;
+
+    if (dictIsRehashing(d)) _dictRehashStep(d);// 。。。
+
+    /* Get the index of the new element, or -1 if
+     * the element already exists. */
+    if ((index = _dictKeyIndex(d, key, dictHashKey(d,key), existing)) == -1)// 已存在返回NULL
+        return NULL;
+
+    /* Allocate the memory and store the new entry.
+     * Insert the element in top, with the assumption that in a database
+     * system it is more likely that recently added entries are accessed
+     * more frequently. */
+    ht = dictIsRehashing(d) ? &amp;d-&gt;ht[1] : &amp;d-&gt;ht[0];// 如果正在进行rehash操作则插入到ht[1]中
+    entry = zmalloc(sizeof(*entry));
+    entry-&gt;next = ht-&gt;table[index];
+    ht-&gt;table[index] = entry;
+    ht-&gt;used++;
+
+    /* Set the hash entry fields. */
+    dictSetKey(d, entry, key);
+    return entry;
+}</code></pre>
+<h4 id="渐进式rehash"><a href="#渐进式rehash" class="headerlink" title="渐进式rehash"></a>渐进式rehash</h4><p>rehash在除了在扩容时会触发 缩容时也会 其分以下几步完成</p>
+<ol>
+<li>给hash表ht[1]申请足够的空间 扩容时空间大小为当前容量*2 当使用量不足总空间的10%时 进行缩容 缩容大小为整好包含d-&gt;ht[0].used个节点的2的幂次方整数 并标记<code>rehashidx</code>字段为0</li>
+<li>进行rehash操作调用<code>dictRehash</code>实现 重新计算ht[0]中每个键的hash值与索引值 一次添加到hash表ht[1] 并把老hash表中该键值对删除 把字典中字段rehashidx修改为hash表ht[0]操作节点的索引值</li>
+<li>清空ht[0] 对调ht[0]和ht[1]的值 标记<code>rehashidx</code>为-1</li>
+</ol>
+<h4 id="字典的遍历"><a href="#字典的遍历" class="headerlink" title="字典的遍历"></a>字典的遍历</h4><p>两种方式</p>
+<ul>
+<li>全遍历 <code>keys</code> 一次遍历完整个数据库</li>
+<li>间断遍历 <code>hscan</code> 每次命只取部分数据 分多次遍历</li>
+</ul>
+<pre><code class="c">typedef struct dictIterator {
+    dict *d;//迭代字典
+    long index;//当前迭代到hash表中哪个索引值
+    int table, safe;//table表示正在迭代的hash表 ht[0]与ht[1] safe表示当前创建的迭代器是否是安全迭代器
+    dictEntry *entry, *nextEntry;//当前节点 下一个节点
+    /* unsafe iterator fingerprint for misuse detection. */
+    long long fingerprint;//字典指纹 当字典发生改变时该值随之改变
+} dictIterator;</code></pre>
+<p>迭代器分为两类</p>
+<ol>
+<li>普通迭代器 只遍历数据</li>
+<li>安全迭代器 支持遍历的同时更新数据</li>
+</ol>
+<h5 id="全遍历"><a href="#全遍历" class="headerlink" title="全遍历"></a>全遍历</h5><ul>
+<li><p>普通迭代器迭代过程</p>
+<ol>
+<li><code>dictGetIterator</code>函数初始化一个普通迭代器</li>
+<li>循环调用<code>dictNext</code>函数依次遍历字典中hash表的节点 首次遍历时会通过<code>dictFingerprint</code>拿到当前字典的指纹值</li>
+<li>调用<code>dictNext</code>函数遍历完字典hash表中全部节点数据后 释放迭代器时会继续调用<code>dictFingerprint</code>函数计算字典的指纹值 并于首次拿到的指纹值比较 不等则输出assertion failed 退出执行</li>
+</ol>
+</li>
+<li><p>安全迭代器</p>
+<p>  通过限制rehash的进行来保证数据的准确性 迭代过程中可以进行增删改查等操作 如keys 命令就采用这种方式</p>
+<ol>
+<li>调用<code>dictGetSafeIterator</code>函数初始化一个安全迭代器 此时会把<code>iter-&gt;safe</code>置1以标识之</li>
+<li>循环调用<code>dictNext</code>函数依次遍历字典中hash表的节点 首次遍历时会把iterators字段进行+1操作 确保渐进式rehash在迭代过程中会被中断</li>
+<li>迭代完毕后释放iterator并对字典中的<code>iterators</code>字段-1 确保后续rehash正常进行</li>
+</ol>
+</li>
+</ul>
+<pre><code class="c">static void _dictRehashStep(dict *d) {
+    if (d-&gt;iterators == 0) dictRehash(d,1);
+}</code></pre>
+<h5 id="间断遍历"><a href="#间断遍历" class="headerlink" title="间断遍历"></a>间断遍历</h5><ul>
+<li><p>核心算法:</p>
+<p>  reverse binary iteration 游标对sizemask的反码进行或运算 然后按bit反转 将反转后的结果自增 再反转 得出结果 这种算法可能会导致重复遍历 但不会遗漏 其基于这样一个事实:redis扩容及缩容都整好为整倍数的增长或者减少 根据这个特征很容易就能推导出同一个节点在扩容/缩容后在新的hash表中的分布位置从而避免重复遍历或者遗漏遍历 关于该算法的说明可参见<a href="https://github.com/antirez/redis/pull/579#issuecomment-16871583" target="_blank" rel="noopener">github提交记录</a></p>
+</li>
+</ul>
+<p>以下是commitor在对于该算法的说明的部分摘要</p>
+<blockquote>
+<p>Whenever a hash table is grown from size 2^N to size 2^(N+1), we know that elements in slot i will be distributed across slots i and i + N, because growing adds a significant bit to every element’s hash. When an iterator has just started and emitted slot 0, we would like to not emit slot N again in the new table because we know it was already emitted via slot 0 in the old table. We wish to do the same for larger growth factors. For instance: going from N to 4N, slot i will be distributed among i, i + N, i + 2N, and i + 3N. More generally, going from N to 2^M * N, slot i will be distributed among i + j*N where j &lt;- [0, 2^M-1]. If we look at the binary representation of these slots, it is clear that they have the same M most significant bits. Therefore, if we have an iteration scheme where these bits are ignored, we can avoid re-visiting these slots.</p>
+</blockquote>
+<p>db.c中的<code>void scanGenericCommand(client *c, robj *o, unsigned long cursor)</code>部分代码</p>
+<pre><code class="c">do {
+            cursor = dictScan(ht, cursor, scanCallback, NULL, privdata);
+        } while (cursor &amp;&amp;
+              maxiterations-- &amp;&amp;
+              listLength(keys) &lt; (unsigned long)count);</code></pre>
+<p>dict.c中的<code>dictScan</code>部分相关代码:</p>
+<pre><code class="c">unsigned long dictScan(dict *d,
+                       unsigned long v,
+                       dictScanFunction *fn,
+                       dictScanBucketFunction* bucketfn,
+                       void *privdata)
+{
+    ...
+      t0 = &amp;(d-&gt;ht[0]);
+        m0 = t0-&gt;sizemask;
+
+        /* Emit entries at cursor */
+        if (bucketfn) bucketfn(privdata, &amp;t0-&gt;table[v &amp; m0]);
+        de = t0-&gt;table[v &amp; m0];
+        while (de) {
+            next = de-&gt;next;
+            fn(privdata, de);
+            de = next;
+        }
+
+        /* Set unmasked bits so incrementing the reversed cursor
+         * operates on the masked bits */
+        v |= ~m0;
+
+        /* Increment the reverse cursor */
+        v = rev(v);
+        v++;
+        v = rev(v);
+    ...
+}</code></pre>
+<h3 id="整数集合-intset"><a href="#整数集合-intset" class="headerlink" title="整数集合(intset)"></a>整数集合(intset)</h3><p>一个高效有序 存储整型数据的数据结构</p>
+<pre><code>127.0.0.1:6379&gt; sadd test1Set 1 2 -1 -6
+(integer) 4
+127.0.0.1:6379&gt; object encoding test1Set
+&quot;intset&quot;</code></pre><p>其会在以下两种情况下发生转化:</p>
+<ol>
+<li>元素个数超过一定数量(默认512)后转化为hashtable</li>
+<li>增加非整型变量时转化为hashtable</li>
+</ol>
+<p>intset结构定义:</p>
+<pre><code class="c">typedef struct intset {
+    uint32_t encoding;
+    uint32_t length;
+    int8_t contents[];
+} intset;</code></pre>
+<p>其查找采用二分搜索</p>
+<h3 id="quicklist"><a href="#quicklist" class="headerlink" title="quicklist"></a>quicklist</h3><p>在引入quicklist之前 redis采用ziplist和adlist(双端链表)作为list的底层实现 当元素比较少且元素长度较短时 redis采用ziplist 否则采用adlist 因为当元素长度比较小时 ziplist可以有效节省存储空间 但ziplist存储空间是连续的 当元素个数比较多时 修改元素必须重新分配存储空间 无疑会影响redis的执行效率</p>
+<p>quikclist由list和ziplist结合而成</p>
+<p>quicklist是一个双向链表 而其每一个节点都是一个ziplist 当ziplist节点个数过多 quicklist退化为双向链表 一个极端的情况下每个ziplist节点只包含一个entry; 当ziplist元素过少时 quicklist可退化为ziplsit 一种极端的情况是quicklist中只有一个ziplist节点</p>
+<p><img src="/img/redis_quicklist_1.png" srcset="/img/loading.gif" alt="QL"></p>
+<pre><code class="c">typedef struct quicklist {
+    quicklistNode *head;
+    quicklistNode *tail;
+    unsigned long count;        /* total count of all entries in all ziplists */
+    unsigned long len;          /* number of quicklistNodes */
+    int fill : 16;              /* fill factor for individual nodes */
+    unsigned int compress : 16; /* depth of end nodes not to compress;0=off */
+} quicklist;</code></pre>
+<p>其中的<code>fill</code>字段为正数时用来表明每个ziplist最多包含的数据项数 为负数时表示ziplist最大占用内存-1为4kB -5为64kb</p>
+<pre><code class="c">/* quicklistNode is a 32 byte struct describing a ziplist for a quicklist.
+ * We use bit fields keep the quicklistNode at 32 bytes.
+ * count: 16 bits, max 65536 (max zl bytes is 65k, so max count actually &lt; 32k).
+ * encoding: 2 bits, RAW=1, LZF=2.
+ * container: 2 bits, NONE=1, ZIPLIST=2.
+ * recompress: 1 bit, bool, true if node is temporarry decompressed for usage.
+ * attempted_compress: 1 bit, boolean, used for verifying during testing.
+ * extra: 10 bits, free for future use; pads out the remainder of 32 bits */
+typedef struct quicklistNode {
+    struct quicklistNode *prev;
+    struct quicklistNode *next;
+    unsigned char *zl;
+    unsigned int sz;             /* ziplist size in bytes */
+    unsigned int count : 16;     /* count of items in ziplist */
+    unsigned int encoding : 2;   /* RAW==1 or LZF==2 */
+    unsigned int container : 2;  /* NONE==1 or ZIPLIST==2 */
+    unsigned int recompress : 1; /* was this node previous compressed? */
+    unsigned int attempted_compress : 1; /* node can&#39;t compress; too small */
+    unsigned int extra : 10; /* more bits to steal for future usage */
+} quicklistNode;</code></pre>
+<p>其中的<code>zl</code>字段指向该节点对应的ziplist结构</p>
+<p>quicklist每个节点的实际数据存储结构为ziplist 该结构主要优点就是节省存储空间 redis还允许对其进行进一步压缩 redis采用<strong>LZF</strong>算法 压缩过后的数据分为多个片段 每个片段有两个部分 <strong>一个部分是解释字段 另一个部分是存放具体的数据字段</strong> 解释字段栈1-3字节 数据字段可能不存在 </p>
+<p>该压缩算法的基本思想比较简单就是 <strong>数据与前面重复的 记录重复位置以及重复长度 否则直接记录原始数据内容</strong></p>
+<p>具体的压缩格式略过</p>
+<p>具体代码实现略过 看着过于复杂</p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/C/">C</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Redis/">Redis</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Redis源码解析笔记&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>内存管理 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Monday, April 8th 2019, 11:30 am
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    5.6k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      20 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h2><h3 id="虚拟内存的作用"><a href="#虚拟内存的作用" class="headerlink" title="虚拟内存的作用"></a>虚拟内存的作用</h3><ol>
+<li>将主存作为一个存储在磁盘上的地址空间的高速缓存 主存中只保留活动区域 并根据需要在磁盘和主存之间来回传送数据(内存页的换入换出)</li>
+<li>为每个进程提供了一个一致的地址空间 从而简化了内存管理</li>
+<li>保护了每个进程的地址空间不被其它进程破坏</li>
+</ol>
+<p>任意时刻 虚拟页面的集合分为3个不相交的子集</p>
+<ol>
+<li>未分配的 VM系统未分配的页</li>
+<li>缓存的 当前已缓存在物理内存中的已分配页</li>
+<li>未缓存的 未缓存在物理内存中的已分配页</li>
+</ol>
+<p><img src="/img/vm-cache.png" srcset="/img/loading.gif" alt=""></p>
+<h3 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h3><p>CPU的一个控制寄存器–页表基址寄存器(Page Table Base Register) 指向当前页表 n位的虚拟地址包括两个部分 一个P位的虚拟页面偏移(Virtual Page Offset VPO)和一个(n-p)位的虚拟页号(Virtual Page Number) MMU利用VPN 来选择适当的页表项(Virtual Page Entry VPE) 并将条目中的物理页号和虚拟地址中的VPO串联起来 就得到相应的物理地址</p>
+<p><img src="/img/page_table_translation.jpg" srcset="/img/loading.gif" alt=""></p>
+<ul>
+<li>当页面命中时 CPU硬件的执行步骤如下</li>
+</ul>
+<ol>
+<li>处理器生成一个虚拟地址 并將之传送给MMU</li>
+<li>MMU生成PTE地址 并从高速缓存/主存请求得到它</li>
+<li>高速缓存/主存向MMU返回PTE</li>
+<li>MMU根据PTE构造物理地址</li>
+<li>高速缓存/主存返回所请求的数据给处理器</li>
+</ol>
+<ul>
+<li>当发生缺页时 执行步骤</li>
+</ul>
+<p>1-3 同上<br>4. PTE的有效位为0 MMU触发异常 传递CPU中的控制到操作系统内核中的异常处理程序<br>5. 缺页处理程序确定出物理内存中的牺牲页 如果该页面已经被修改了则將之换出到磁盘<br>6. 缺页处理程序页面调入新的页面 并更新PTE<br>7. 缺页程序返回到原来的进程 再次执行导致缺页的指令 CPU将引起缺页的虚拟地址重新发送给MMU 因为虚拟页面现在缓存在物理内存中 所以将会命中</p>
+<h2 id="内存分页"><a href="#内存分页" class="headerlink" title="内存分页"></a>内存分页</h2><p><strong>思想</strong>：通过映射，将连续的线性地址（虚拟地址）与任意的物理内存地址相关联，逻辑上连续的线性地址其对应的物理地址可以不连续。</p>
+<h3 id="32位下运行机制"><a href="#32位下运行机制" class="headerlink" title="32位下运行机制"></a>32位下运行机制</h3><p>先从CR3中获取页目录物理地址，然后用虚拟地址的高10位乘4作为页目录表中的偏移量去寻址目录项pde，从pde中读出页表物理地址，然后用中间10位乘4的积作为页表中的偏移量去寻址pte，从该pte中读出页框物理地址，用虚拟地址的低12位作为页框中的偏移量，最终完成映射。</p>
+<p><strong>分页机制的作用</strong>：</p>
+<ul>
+<li>将线性地址转换成物理地址</li>
+<li>用大小相等的页代替大小不等的段</li>
+</ul>
+<p>在分页机制打开前，要将页表加载到控制寄存器cr3中，这是启用分页机制的先决条件，因此，打开分页机制前加载到cr3寄存器中的仍是页表的物理地址，页表中的页表项的地址也是物理地址。</p>
+<p>在32位保护模式 4K页大小，一级页表的情形下，虚拟线性地址的前20位用来标识内存块索引数，后12位用来在页内索引。（2^20=1M, 2^12=4K)</p>
+<p>一级页表的弊端：</p>
+<ol>
+<li>一级页表全满需要占用4M空间(32位机 地址长32bit 4字节 1M个页表项 * 4字节 = 4M)</li>
+<li>一级页表所有页表项必须提前建好，OS占虚拟地址空间的高1G，用户占低3G</li>
+<li>每个进程都有自己的页表，进程较多的话，占用空间太大</li>
+</ol>
+<p>在32位保护模式 4K页大小，二级页表的情形下，高10位用来定位页目录中的页表，中间10位用来定位物理页，低12位用来页内索引</p>
+<p><strong>启动分页机制</strong>:</p>
+<ol>
+<li>准备好页目录及页表</li>
+<li>将页表（页目录）地址写入控制寄存器cr3</li>
+<li>寄存器cr0的PG位置1</li>
+</ol>
+<p><strong>页表项及页目录结构</strong>：</p>
+<p>高12～31位存储地址，0～11存储相关属性</p>
+<h2 id="翻译后备缓冲器TLB-又称快表-Translation-Lookaside-Buffer"><a href="#翻译后备缓冲器TLB-又称快表-Translation-Lookaside-Buffer" class="headerlink" title="翻译后备缓冲器TLB(又称快表 Translation Lookaside Buffer)"></a>翻译后备缓冲器TLB(又称快表 Translation Lookaside Buffer)</h2><p>用来缓存虚拟地址页框和物理地址的映射关系，用以避免过于频繁的映射计算和内存读取，其对开发人员不可见，但可以通过重新加载cr3寄存器使整个TLB失效，或者通过<strong>invlpg（invalidate page）</strong>指令来间接更新TLB，invlpg指令用来在TLB中刷新某个虚拟地址对应的条目，指令格式为<strong>invlpg [m]</strong> （m表示操作数为虚拟地址）</p>
+<p>当使用TLB并命中时 <strong>所有的地址翻译都在芯片上的MMU执行</strong> 因此速度非常快</p>
+<h3 id="多级页表"><a href="#多级页表" class="headerlink" title="多级页表"></a>多级页表</h3><p>假设有一个32位的地址空间 4KB的页 和一个4字节的PTE 那么即使应用所引用的只是虚拟地址空间中的很小一部分 也总需要一个4MB的页表驻留内存中 如果是64位系统那么这一现象将更加严重</p>
+<p>仅有一级页表的话会导致页表占用内存过多 内存利用效率低下的问题 因此 我们可以引入多级页表来缓解这一问题 这种方法可以从两个方面来解决这一问题</p>
+<ol>
+<li>如果一级页表中的一个PTE是空的 那么相应的二级页表就根本不会存在 这代表着一种巨大的节约 因为对于一个普通的程序 4GB虚拟地址空间的大部分都会是未分配的</li>
+<li>只有一级月表才需要总是在内存中 虚拟内存系统可以在需要时创建 页面调入或调出二级页表从而减少了内存的压力</li>
+</ol>
+<p><img src="/img/pt_of_corei7.jpg" srcset="/img/loading.gif" alt=""></p>
+<h2 id="内存段的保护"><a href="#内存段的保护" class="headerlink" title="内存段的保护"></a>内存段的保护</h2><p>当引用一个内存段时，需要往寄存器中加载段选择子，为了避免出现非法引用内存的情况，需要作如下检查：</p>
+<ol>
+<li>根据选择子的值验证段描述符是否越界，即选择子的高13位的值一定要小于等于描述符表（GDT || LDT）中描述符的个数，就像数组下标一样，不能越界</li>
+</ol>
+<p>公式：</p>
+<pre><code class="shell">描述符表基地址+选择子中的索引值 * 8 + 7 &lt;= 描述符表基地址 + 描述符表界限值</code></pre>
+<ol start="2">
+<li>根据描述符中的<strong>Type</strong>字段，判断段寄存器的用途和段类型是否匹配。</li>
+<li>检查完Type后，检查段是否存在，如果存在则将选择子装载入段寄存器，同时段描述符缓冲寄存器也会更新为对应选择子对应的段描述符的内容，随后将段描述符中的A位置为一，表示已访问过</li>
+</ol>
+<h2 id="特权级"><a href="#特权级" class="headerlink" title="特权级"></a>特权级</h2><p>任务是由处理器执行的，任务在特权级变换时，本质上时处理器的特权级在变化，由一个特权级变为另一个。<em>处理器在不同的特权级下使用不同级别的栈，原因是如果在同一个栈中容纳所有特权级的数据时，这种交叉引用会使栈变得非常混乱。</em></p>
+<p>特权级转移分为两类：一类是由中断门 调用门等实现特权级由低向高转移，另一类是调用返回指令从高向低返回，这是<strong>唯一</strong>一种能让处理器从高向低转移的情况。</p>
+<p>当特权级由低向高转移时，它会自动把当时低特权级的栈地址压入转移后高特权级所在的栈中。</p>
+<p>TSS中的栈指针时固定的，如果想要保留上一次高特权级的栈指针，需要手动更新TSS中相应的栈数据。</p>
+<h3 id="CPL-DPL-RPL"><a href="#CPL-DPL-RPL" class="headerlink" title="CPL DPL RPL"></a>CPL DPL RPL</h3><p>当前特权级CPL保存在CS选择子中的RPL部分（CS代码段寄存器的低两位）</p>
+<p>处理器特权级转移时，会根据这三个值进行特权级检查。</p>
+<p>当访问者访问某段描述符所描述的内存段时，其特权级应高于该描述符DPL所表示的特权级。</p>
+<h4 id="一致性代码段"><a href="#一致性代码段" class="headerlink" title="一致性代码段"></a>一致性代码段</h4><p>如果段描述符中的S位为0，则用type字段中的C位来表示其是否是一致性代码段，C为1则代表是一致性代码段。一致性代码段是指如果自己是转移后的目标代码段，自己的特权级（DPL）一定要大于等于转移前的CPL（在数值上 转移前CPL&gt;=目标段DPL）。</p>
+<p>一致性代码段的一大特点是转移后的特权级不与自己的特权级（DPL）为主，而是与转移前的低特权级一致，听取 依从转移前的低特权级，也就是说，处理器遇到目标段为一致性代码段时，并不会将CPL用该目标段的DPL替换。这种转移本身并没有提升特权级，只是可以跑到更高的代码段去执行指令，对计算机而言，比干不会因为特权级的升高而产生潜在危险。</p>
+<p>注意，代码段有一致性 非一致性之分，数据段总是非一致的，即数据段不允许比本段特权级更低的代码段访问。</p>
+<h4 id="门-调用门与RPL"><a href="#门-调用门与RPL" class="headerlink" title="门 调用门与RPL"></a>门 调用门与RPL</h4><p>处理器只有通过“门结构”才能低特权转移到高特权</p>
+<p>门结构：_记录一段程序起始地址的描述符_，同段描述符类似，都是8字节大小的数据结构，用来描述门中通向的代码。</p>
+<p>门描述符的结构见 _《操作系统真相还原》236页，我懒得再去网上找了。</p>
+<p>仅仅凭CPL和DPL，处理器可以通过门访问并获得任何资源，无法保证计算机的安全。RPL（Request Privilege Level）的出现解决了这个问题（低特权级的程序访问高特权级的资源）。它代表的是真正请求者的特权级，即真正资源需求者的CPL。<br>引入RPL后，（通过调用门）请求某高DPL级别的资源时，需在数值上满足 <em>DPL_GATE &gt;= CPL &gt;= DPL &amp;&amp; RPL &lt;= DPL</em></p>
+<p>以下公式皆为数值上</p>
+<p>不通过门，直接访问:</p>
+<p><em>CPL &gt;= target code segment DPL &amp;&amp; RPL &gt;= target code segment DPL</em></p>
+<p><em>CPL &lt;= target data segment DPL &amp;&amp; RPL &lt;= target data segment DPL</em></p>
+<p>对于非一致性代码段，jmp指令只能平级转移：</p>
+<p><em>DPL_GATE &gt;= CPL = DPL_CODE</em><br><em>RPL &lt;= DPL_GATE</em></p>
+<h2 id="组织虚存的数据结构"><a href="#组织虚存的数据结构" class="headerlink" title="组织虚存的数据结构"></a>组织虚存的数据结构</h2><p>主要讨论位图和链表这两种方式</p>
+<ul>
+<li><p>位图</p>
+<p>内存被划分成小到几个字或大到几千字节的分配单元，每个的单元对应位图中的一位，0表示空闲，1表示占用。<br>这种方式的主要问题是在决定把一个占k个分配单元的进程调入内存时，存储管理器必须搜索位图。在位图中找出由k个连续0的串。查找指定0串是一个耗时操作。</p>
+</li>
+<li><p>链表</p>
+<p>维护一个记录已分配内存段和空闲内存段的链表，链表中的一个节点或者包含一个进程，或者是两个进程间的一个空闲区。链表的每一个节点都包含以下区域：空闲区或进程的指示标志 起始地址 长度 和指向下一节点的指针。</p>
+<p>因为进程表中表示终止进程的节点中，通常含有指向对应于其段链表节点的指针，因此使用双端链表要比单链表更好，因为其更容易找到上一个节点并合并。</p>
+</li>
+</ul>
+<p>存储管理器分配的几种方法：首次适配，最佳适配，最差适配，快速适配法。</p>
+<h2 id="slab分配器"><a href="#slab分配器" class="headerlink" title="slab分配器"></a>slab分配器</h2><p>这部分内容来自<a href="https://www.ibm.com/developerworks/cn/linux/l-linux-slab-allocator/index.html" target="_blank" rel="noopener">ibm developer</a></p>
+<h3 id="内存存分配策略"><a href="#内存存分配策略" class="headerlink" title="内存存分配策略"></a>内存存分配策略</h3><p>每个内存管理器都使用了一种基于堆的分配策略。在这种方法中，大块内存（称为 堆）用来为用户定义的目的提供内存。当用户需要一块内存时，就请求给自己分配一定大小的内存。堆管理器会查看可用内存的情况（使用特定算法）并返回一块内存。搜索过程中使用的一些算法有 <strong>first-fit</strong>（在堆中搜索到的第一个满足请求的内存块 ）和 <strong>best-fit</strong>（使用堆中满足请求的最合适的内存块）。当用户使用完内存后，就将内存返回给堆。</p>
+<p>这种基于堆的分配策略的根本问题是碎片（fragmentation）。当内存块被分配后，它们会以不同的顺序在不同的时间返回。这样会在堆中留下一些洞，需要花一些时间才能有效地管理空闲内存。这种算法通常具有较高的内存使用效率（分配需要的内存），但是却需要花费更多时间来对堆进行管理。</p>
+<p><strong>buddy memory allocation</strong>，是一种更快的内存分配技术，它将内存划分为 2 的幂次方个分区，并使用 best-fit 方法来分配内存请求。当用户释放内存时，就会检查 buddy 块，查看其相邻的内存块是否也已经被释放。如果是的话，将合并内存块以最小化内存碎片。这个算法的时间效率更高，但是由于使用 best-fit 方法的缘故，会产生内存浪费。</p>
+<p>Linux 所使用的 slab 分配器的基础是 Jeff Bonwick 为 SunOS 操作系统首次引入的一种算法。Jeff 的分配器是围绕对象缓存进行的。在内核中，会为有限的对象集（例如文件描述符和其他常见结构）分配大量内存。Jeff 发现对<strong>内核中普通对象进行初始化所需的时间超过了对其进行分配和释放所需的时间。因此他的结论是不应该将内存释放回一个全局的内存池，而是将内存保持为针对特定目而初始化的状态</strong>。例如，如果内存被分配给了一个互斥锁，那么只需在为互斥锁首次分配内存时执行一次互斥锁初始化函数（mutex_init）即可。后续的内存分配不需要执行这个初始化函数，因为从上次释放和调用析构之后，它已经处于所需的状态中了。</p>
+<p>Linux slab 分配器使用了这种思想和其他一些思想来构建一个在空间和时间上都具有高效性的内存分配器。</p>
+<p>下图 给出了 slab 结构的高层组织结构。在最高层是 cache_chain，这是一个 slab 缓存的链接列表。这对于 best-fit 算法非常有用，可以用来查找最适合所需要的分配大小的缓存（遍历列表）。</p>
+<p><img src="/img/Linux_slab.gif" srcset="/img/loading.gif" alt=""></p>
+<p><code>slabs_full</code></p>
+<p>完全分配的 slab</p>
+<p><code>slabs_partial</code></p>
+<p>部分分配的 slab</p>
+<p><code>slabs_empty</code></p>
+<p>空 slab，或者没有对象被分配</p>
+<p>//这么看来Nettty管理内存的策略和这个slab分配器的实现非常的相似</p>
+<p>注意 slabs_empty 列表中的 slab 是进行<strong>回收（reaping）</strong>的主要备选对象。正是通过此过程，slab 所使用的内存被返回给操作系统供其他用户使用。</p>
+<p>slab 列表中的每个 slab 都是一个连续的内存块（一个或多个连续页），它们被划分成一个个对象。<strong>这些对象是从特定缓存中进行分配和释放的基本元素</strong>。注意 slab 是 slab 分配器进行操作的最小分配单位，因此如果需要对 slab 进行扩展，这也就是所扩展的最小值。通常来说，每个 slab 被分配为多个对象。</p>
+<p><strong>由于对象是从 slab 中进行分配和释放的，因此单个 slab 可以在 slab 列表之间进行移动</strong>。例如，当一个 slab 中的所有对象都被使用完时，就从 slabs_partial 列表中移动到 slabs_full 列表中。当一个 slab 完全被分配并且有对象被释放后，就从 slabs_full 列表中移动到 slabs_partial 列表中。当所有对象都被释放之后，就从 slabs_partial 列表移动到 slabs_empty 列表中。</p>
+<h3 id="slab-背后的动机"><a href="#slab-背后的动机" class="headerlink" title="slab 背后的动机"></a>slab 背后的动机</h3><p>与传统的内存管理模式相比， slab 缓存分配器提供了很多优点。首先，内核通常依赖于对小对象的分配，它们会在系统生命周期内进行无数次分配。slab 缓存分配器通过对类似大小的对象进行缓存而提供这种功能，从而避免了常见的碎片问题。slab 分配器还支持通用对象的初始化，从而避免了为同一目而对一个对象重复进行初始化。最后，slab 分配器还可以支持硬件缓存对齐和着色，这允许不同缓存中的对象占用相同的缓存行，从而提高缓存的利用率并获得更好的性能。</p>
+<p>//本文后面还对slab相关的C api进行了介绍</p>
+<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>linux中使用<code>linux/mm_types.h</code>中的<code>page</code>结构体来描述物理页 其过于庞大 在此处不再展示 其记录了物理页的状态 引用计数 虚拟地址等等</p>
+<h2 id="页高速缓存与页回写"><a href="#页高速缓存与页回写" class="headerlink" title="页高速缓存与页回写"></a>页高速缓存与页回写</h2><ul>
+<li><p>回写:</p>
+<p>  程序执行写操作直接写入到缓存中 后端存储不会立刻直接更新 而是将页写操作只写写到缓存中 后端存储不会立刻直接更新 而是将页高速缓存中被写入的页面标记为脏 并加入到脏页链表中 然后由回写任务周期性第将脏页写回磁盘</p>
+</li>
+<li><p>缓存回收策略:</p>
+<p>  linux采用了双链表近似的实现了一个LRU算法 其维护两个链表-活跃链表和非活跃链表 前者不会被换出 而后者会 且处于前者的页面必须在其被访问时就处于后者(更清晰的表述是 当一个缓存页被分配(allocated)时 它就会被放入inactive_list(<strong>一个FIFO的队列</strong>) 而当该缓存页第一次被引用(referenced)时 它就会被加入到active_list(<strong>一个LRU managed的链表</strong>)) 页面从inactive的尾部加入并从其头部移除 当活跃链表超过了非活跃链表 那么linux将调用<code>refill_inactive</code>函数来将一部分active_list中的尾部页面移入到 inactive_list中 以便能够再次被回收 并使active_list中页面的数量大概维持在总缓存页的三分之二左右<br>  这种双链表方式被称为<code>LRU-2</code> 推而广之到多链表实现就是<code>LRU-K</code> <strong>其优点在于两个链表各自进行淘汰 在页面仅被使用一次的情况下 能够较快的被淘汰</strong><br>  鉴于所读的那本书描述的即便是加上一些补充说明还是过于模糊 这里引用一下文档的说明</p>
+<p>  注意主有干净的页可以被回收</p>
+<p>  The lists resemble a simplified LRU 2Q <a href="https://www.kernel.org/doc/gorman/html/understand/understand031.html#johnson94low" target="_blank" rel="noopener">JS94</a> where two lists called Am and A1 are maintained. With LRU 2Q, pages when first allocated are placed on a FIFO queue called A1. If they are referenced while on that queue, they are placed in a normal LRU managed list called Am. This is roughly analogous to using lru_cache_add() to place pages on a queue called inactive_list (A1) and using mark_page_accessed() to get moved to the active_list (Am). The algorithm describes how the size of the two lists have to be tuned but Linux takes a simpler approach by using refill_inactive() to move pages from the bottom of active_list to inactive_list to keep active_list about two thirds the size of the total page cache. Figure ?? illustrates how the two lists are structured, how pages are added and how pages move between the lists with refill_inactive().</p>
+<p>  <img src="/img/Linux_Page_Cache_LRU_List.png" srcset="/img/loading.gif" alt=""></p>
+<p>  关于此算法的更详细的说明可见<a href="https://www.kernel.org/doc/gorman/html/understand/understand013.html" target="_blank" rel="noopener">knerl.org</a></p>
+</li>
+<li><p>Linux页高速缓存</p>
+<p>  缓存的页来自正规文件 块设备文件和内存映射文件读写 如此一来 页高速缓存就包含了最近被访问过的文件中的数据块 在执行一个I/O操作前(如<code>read</code>等) 内核会检查数据是否已经在页高速缓存中了 如果需要的数据确实在高速缓存中 那么内核可以从内存中迅速的返回需要的页 而不再需要从相对较慢的磁盘上读取数据</p>
+<p>  为了让Linux的页缓存具有普适性(不仅仅通过扩展<code>inode</code>结构来缓存文件i/o) Linux页高速缓存使用<code>address_space</code>结构体来描述页缓存 当一个文件被10个<code>vm_area_struct</code>结构体标识(5个进程每个调用mmap两次) 那么这个文件只能有一个<code>address_space</code>数据结构 也就是说文件可以有多个虚拟地址 但只能在物理内存有一份 下面是定义在<code>linux/fs.h</code>中的<code>address_space</code>结构体 其字段在注释中都有解释不再赘述 重点关注一下<code>host</code>字段 指向本结构锁关联的内核对象比如inode <code>i_mmap</code>是一个和<code>radix</code>树结合的快速检索树 用以快速检查页是否液晶在页高速缓存中</p>
+<pre><code class="c"></code></pre>
+</li>
+</ul>
+<p>/**</p>
+<ul>
+<li>struct address_space - Contents of a cacheable, mappable object.</li>
+<li>@host: Owner, either the inode or the block_device.</li>
+<li>@i_pages: Cached pages.</li>
+<li>@gfp_mask: Memory allocation flags to use for allocating pages.</li>
+<li>@i_mmap_writable: Number of VM_SHARED mappings.</li>
+<li>@nr_thps: Number of THPs in the pagecache (non-shmem only).</li>
+<li>@i_mmap: Tree of private and shared mappings.</li>
+<li>@i_mmap_rwsem: Protects @i_mmap and @i_mmap_writable.</li>
+<li>@nrpages: Number of page entries, protected by the i_pages lock.</li>
+<li>@nrexceptional: Shadow or DAX entries, protected by the i_pages lock.</li>
+<li>@writeback_index: Writeback starts here.</li>
+<li>@a_ops: Methods.</li>
+<li>@flags: Error bits and flags (AS_*).</li>
+<li>@wb_err: The most recent error which has occurred.</li>
+<li>@private_lock: For use by the owner of the address_space.</li>
+<li>@private_list: For use by the owner of the address_space.</li>
+<li>@private_data: For use by the owner of the address_space.</li>
+<li>/<br>struct address_space {<br>  struct inode        <em>host;<br>  struct xarray        i_pages;<br>  gfp_t            gfp_mask;<br>  atomic_t        i_mmap_writable;<br>#ifdef CONFIG_READ_ONLY_THP_FOR_FS<br>  /</em> number of thp, only for non-shmem files */<br>  atomic_t        nr_thps;<br>#endif<br>  struct rb_root_cached    i_mmap;<br>  struct rw_semaphore    i_mmap_rwsem;<br>  unsigned long        nrpages;<br>  unsigned long        nrexceptional;<br>  pgoff_t            writeback_index;<br>  const struct address_space_operations *a_ops;<br>  unsigned long        flags;<br>  errseq_t        wb_err;<br>  spinlock_t        private_lock;<br>  struct list_head    private_list;<br>  void            *private_data;<br>} <strong>attribute</strong>((aligned(sizeof(long)))) __randomize_layout;<br>```</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "内存管理&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>DDIA读书笔记 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Saturday, April 4th 2020, 9:08 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    3.4k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      12 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="DDIA读书笔记"><a href="#DDIA读书笔记" class="headerlink" title="DDIA读书笔记"></a>DDIA读书笔记</h1><p>TO-DO:</p>
+<ol>
+<li>lamport timestamp 与 vector clock的对比</li>
+<li>读关于dynamo的论文</li>
+<li><del>读lamport关于分布式系统中的时钟与事件顺序原文</del></li>
+</ol>
+<h2 id="数据检索"><a href="#数据检索" class="headerlink" title="数据检索"></a>数据检索</h2><ul>
+<li><p>索引:</p>
+<p>  基于原始数据派生而来的额外数据结构 适当的索引可以加速读取查询 但由于每次写数据时 需要更新索引 因此任何类型的索引都会降低写的速度</p>
+</li>
+</ul>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><ul>
+<li><p>哈希索引</p>
+</li>
+<li><p>SortedStringTable(Log Structured Merge Tree)</p>
+<p>  基于这种实现的存储引擎通常工作方式如下:</p>
+<ol>
+<li>当写入时，先将要写入的数据添加到内存中的平衡树结构中(如AVL或者红黑树)，这块内存区域也被成为内存表</li>
+<li>当内存表大于某个阈值时 将其作为一个SSTable文件写入磁盘，由于树已经维护了按键排序的k-v对或数据行，写磁盘可以比较高效。当前一个SSTable写磁盘的同时，可以将期间的写入操作添加到一个新的内存表实例</li>
+<li>为了处理新的读请求，首先尝试在内粗表中查找key，然后是最新的磁盘段文件，然后是次新的磁盘段文件，以此类推，直到找到目标数据或者为空(这也意味着对于不存在的数据的查找，SST(LSM)效率将非常低下)</li>
+<li>后台进程周期性的执行合并与压缩过程，以合并多个段文件，并丢弃那些已经被覆盖或者删除的val</li>
+</ol>
+</li>
+<li><p>B-Tree</p>
+<p>  B树像SSTable一样保留了按键排序的键值对 但相比于前两者始终按顺序写入段 B树将数据库分解为<strong>固定大小</strong>的块或页 传统上大小为4KB 页是内部读/写的最小单元 这种设计更接近底层硬件 因为磁盘也是以固定大小的块排列</p>
+<p>  每个页面都可以使用地址或者位置进行标识 这样可以让一个页面引用另一个页面 类似指针 不过<strong>指向磁盘地址 而不是内存</strong> 可以使用这些页面引用来构造一个树状页面</p>
+<p>  B树的写操作与前两者仅追加不修改相比 其会使用新数据覆盖磁盘上的旧页 而B树的更新操作(插入删除等等)往往会需要进行一系列较为复杂的操作 如插入时可能会需要分裂页 这意味着如果数据库在完成部分页写入之后发生崩溃 最终会导致整个索引的崩坏 因此基于B树的数据库往往会引入<strong>WAL(write ahead log)</strong> 也成为重做日志 其是一个仅支持追加修改的文件 每个B树的修改必须先更新WAL然后修改树本身的页 当数据库在崩溃后需要恢复时 该日志用于将B树恢复到最近一致的状态(MYSQL中的redo log与bin log)</p>
+<p>  B树的优化:</p>
+<ul>
+<li>保存缩略的信息，如MySQL中非叶子节点只存储键值 不存储数据 以节省页空间 让树具有更高的<strong>分支因子</strong> 时更多的键压入到页中 从而减少层数</li>
+<li>添加额外的指针到树中 每个叶子页面可能会向左或者向右引用其同级的兄弟页 这样可以顺序扫面键 而不用跳回到父页</li>
+</ul>
+</li>
+</ul>
+<h4 id="B树与LSM的优缺点"><a href="#B树与LSM的优缺点" class="headerlink" title="B树与LSM的优缺点"></a>B树与LSM的优缺点</h4><ul>
+<li><p>LSM-Tree的优点</p>
+<p>  B树索引至少写2次数据 一次写入预写日志 一次写入树的页本身(还可能发生页分裂) 即使该页中只有几个字节的更改 也必须成熟整个页的开销 这种由一次写入请求导致多次磁盘读写的现象我们称之为<strong>写放大</strong> 对于写密集型应用 性能瓶颈很可能在于写入磁盘的次数过多 可用磁盘带宽中每秒处理的写入就更少</p>
+<p>  而LSM-tree相对于B-tree来讲一般写放大较小 其以顺序写入放入写入紧凑的SSTable文件 而不必重写树中的多个页</p>
+<p>  LSM-tree更好的支持压缩 因此通常磁盘上的文件比B tree小很多 因为其不是面向页的 并且定期重写SSTable以消除碎片化 所以存储开销较低(在许多SSD上 固件内部使用<strong>日志结构化算法将随机写入转化为顺序写入</strong> 所以 存储引擎的写入模式影响可能不那么明显 但是更低的写放大和碎片减少对于SSD仍是有益的)</p>
+</li>
+<li><p>缺点</p>
+<p>  压缩过程有时会干扰正在进行的写操作 即使存储引擎尝试增量的进行压缩 并且不影响并发访问 但是磁盘的并发资源终究是有限的 所以当磁盘进行昂贵的压缩操作时 容易发生读写请求等待的情况 相比之下B树的响应延迟更具有确定性</p>
+<p>  另外B树的优点是每个键都恰好唯一对应于索引中的某个位置 而日志结构的存储引擎可能在不同的段中具有相同键的多个副本 这使得如果数据库希望提供强大的事务语义时 B树会更有吸引力:<strong>在于多关系型数据库中 事务隔离是通过键范围上的锁来实现的 并且在B树索引中 这些锁可以直接定义到树中</strong></p>
+</li>
+</ul>
+<h2 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h2><h3 id="无主节点复制"><a href="#无主节点复制" class="headerlink" title="无主节点复制"></a>无主节点复制</h3><pre><code>典型的无主节点复制系统如亚马逊的dynamo，在这种实现中 客户端直接将其写请求发送到多副本，而在一些其他的实现中，有一个协调者节点代表客户端进行写入。</code></pre><h4 id="quorum机制"><a href="#quorum机制" class="headerlink" title="quorum机制"></a>quorum机制</h4><p>如果有N个副本，写入需要w个节点确认，读取必须至少查询r个节点，则只要<code>w + r &gt; n</code> 那么读取的节点中一定会包含最新值。 </p>
+<p>在dynamo风格的数据库中，n w r通常是可配置的，n通常设置为某奇数，<code>w = r = ⌈(n + 1) / 2⌉</code>， 例如， 对于读多写少的场景 可以将w设置的较大，r设置的较小。</p>
+<p>仲裁条件 <code>w + r &gt; n</code> 定义了系统可容忍的失效节点数， 假定n = 5， w = 3, r = 3,则可以容忍两个不可用的节点</p>
+<p>通常写入和读取操作总是<strong>并行</strong>的发送到所有的n个副本，参数w和参数r只是决定要等待的节点数，即，需要有多少个节点返回结果 我们才能判断出结果的正确性</p>
+<ul>
+<li><p>局限性</p>
+<ol>
+<li>两个写操作同时发生，则无法明确先后顺序</li>
+<li>如果写和读同时发生，写可能只在一部分副本上完成，此时，读取返回旧值还是新值具有不确定性</li>
+<li>如果具有新值的节点后来发生失效，但恢复数据来自某个旧值，那么总的新值副本将低于w，这就打破了之前的判定条件</li>
+</ol>
+</li>
+</ul>
+<h2 id="一致性问题"><a href="#一致性问题" class="headerlink" title="一致性问题"></a>一致性问题</h2><h3 id="几种模型"><a href="#几种模型" class="headerlink" title="几种模型"></a>几种模型</h3><ul>
+<li><p>可线性化(强一致性)</p>
+<p>  基本思想是让一个系统看起来只有一个数据副本，且所有的操作都是原子的。使应用程序不必关系系统的多个副本。在可线性化的系统中，一旦某个客户端成功提交写请求，所有客户端的读请求都能看到刚刚写入的值。由于存在并发读写的情况，因此还需要为这类系统添加这样一个约束: 一旦某个读操作返回了新值，之后所有的读都必须返回新值。</p>
+<p>  对于可线性化的系统，存在<strong>全序操作关系</strong>。系统的行为好像只有一个数据副本，且每个操作都是原子的，这意味着任何两个操作，我们总是可以指出哪一个在前。</p>
+</li>
+<li><p>因果一致性</p>
+<p>  如果系统服从于因果关系(比如发送消息先于收到消息，问题出现在答案之前等等)所规定的顺序，则称之为因果一致性。</p>
+<p>  如果两个操作都没有发生在对方之前，那么这两个操作是并发关系。因果关系，可以被排序，并发的事件则不能。也就是说，因果关系至少可以被定义为<strong>偏序</strong></p>
+<ul>
+<li><p>捕获因果依赖关系</p>
+<ol>
+<li>序列号排序: 其保证了全需关系，每一个操作都有一个唯一的顺序号，并且总是可以通过比较来确定哪个更大。但当设计到多主节点下的跨节点捕获操作时，其并不能保证序列号与因果关系的严格一致。</li>
+<li>lamport时间戳–</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>最终一致性</p>
+<p>  不一致的现象是暂时的，所有的副本最终会收敛到相同的值。大多数多副本的数据库都至少提供了最终一致性</p>
+</li>
+<li><p>单调读一致性</p>
+<p>  单调读保证如果某个用户依次进行多次读取，则其绝不会看到回滚现象。即在读取较新值之后又发生读旧值的情况。</p>
+</li>
+</ul>
+<h2 id="分布式系统中的时间，时钟与事件顺序"><a href="#分布式系统中的时间，时钟与事件顺序" class="headerlink" title="分布式系统中的时间，时钟与事件顺序"></a>分布式系统中的时间，时钟与事件顺序</h2><ul>
+<li><p>并发关系与前后关系</p>
+<ul>
+<li><p>并发关系</p>
+<p>  如果两个事件之间并没有因果关系，那么我们称之为并发的。</p>
+</li>
+<li><p>happens-before关系</p>
+<ol>
+<li>如果a，b是同一个进程中的事件，且a在b之前发生，那么a -&gt; b</li>
+<li>如果a是process-a中的发送消息事件，而b是process-b中的process-a发出的消息的确认事件，那么a -&gt; b</li>
+<li>这种关系是可传递的，如果a -&gt; b b -&gt; c 那么 a -&gt; c</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>逻辑时钟的两个条件</p>
+<ol>
+<li>如果a b是进程process-i 中的两个事件，且a早于b发生，那么有C<sub>i</sub>(a) &lt; C<sub>i</sub>(b)</li>
+<li>如果a是process-i的发送消息事件，b是process-j对process-i在事件a中发送消息的接受事件，那么有C<sub>i</sub>(a) &lt; C<sub>j</sub>(b)</li>
+</ol>
+<ul>
+<li><p>为了满足这两个条件我们遵循如下规则:</p>
+<ul>
+<li>IR1: 每一个进程p-i递增C<sub>i</sub>当后继的事件来到时</li>
+<li>IR2: 为了满足条件2，我们遵循如下规则:事件a为p-i发送了一条消息m，那么在消息m中包含一个timestamp Tm = C<sub>i</sub>(a),事件b为p-j收到了消息m，P-j将为C-j设置一个大于或等于当前C-j并且大于T-m所带的C-i(比如set C-j = max(C-j, T-m) + 1 这样?)的值</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="lamport-timestamp"><a href="#lamport-timestamp" class="headerlink" title="lamport timestamp"></a>lamport timestamp</h3><p>每个节点都有一个唯一的标识符，并且各自维护一个计数器来记录各自已经处理的请求总数。lamport是一个值对(计数器，节点id) 其与墙上时钟不存在直接对应关系，但其可以保证全序: 给定两个lamport时间戳，计数器大的时间戳大，如果计数器值正好相同，则节点id越大，时间戳越大。</p>
+<p>其基本流程如下: 每个节点以及每个客户端都跟踪迄今为止见到的最大计数器值，并在每个请求中附带该最大计数器值。当节点收到某个请求时，如果发现请求内嵌的最大计数器值大于自身的计数器值，则立即把自己的计数器修改为该最大值。</p>
+<p><img src="/img/lamport_timestamp.jpg" srcset="/img/loading.gif" alt=""></p>
+<h3 id="version-clock"><a href="#version-clock" class="headerlink" title="version clock"></a>version clock</h3><p><img src="/img/verctor_lock.png" srcset="/img/loading.gif" alt=""></p>
+<p><a href="https://lrita.github.io/2018/10/24/lamport-logical-clocks-vector-lock/" target="_blank" rel="noopener">REF</a></p>
+<p><img src="/img/vector-clock-2.jpg" srcset="/img/loading.gif" alt=""></p>
+<p>当客户端读取数据时，数据库副本返回版本矢量给客户端，客户端在随后的写入时需要将版本信息包含在请求中一起发送得到数据库。这种方式只能发现存在的写冲突，但无法无法解决。发生写冲突时，应将冲突的写操作都记录下来。在客户端再次对冲突写的数据发起读时，将这些数据都返回给客户端，由其进行合并。</p>
+<ul>
+<li><p>一个写冲突检测的例子<a href="[2](https://lrita.github.io/2018/10/24/lamport-logical-clocks-vector-lock/)">SOURCE</a>:</p>
+<ol>
+<li>“用户A在N1节点上设置x=100”   ————  节点N1生成向量&lt;(N1,1)&gt;</li>
+<li>“用户A在N1节点上设置x=200”   ————  节点N1生成向量&lt;(N1,2)&gt;</li>
+<li>“N1将x=200传播到N2” ———–  节点N2生成向量&lt;(N1,2)&gt;</li>
+<li>“N1将x=200传播到N3” ———–   节点N3生成向量&lt;(N1,2)&gt;</li>
+<li>“用户A在N2节点上设置x=300”   ————  节点N2生成向量&lt;(N1,2), (N2,1)&gt;</li>
+<li>“用户B在N3节点上设置x=400”   ———–  节点N3生成向量&lt;(N1,2), (N3,1)&gt;</li>
+</ol>
+</li>
+<li><p>此时各个节点的向量</p>
+<ul>
+<li>N1： &lt;(N1,2)&gt;</li>
+<li>N2：&lt;(N1,2), (N2,1)&gt;</li>
+<li>N3：&lt;(N1,2), (N3,1)&gt;</li>
+</ul>
+<ol start="7">
+<li><p>有个读x的事件</p>
+<p> 客户端其拿到N1,N2,N3上的向量，通过比较可知，N1上的是旧数据，N2/N3版本存在冲突，此时需要用户自己去解决冲突</p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="lamport-时间戳与-vector-version-的对比"><a href="#lamport-时间戳与-vector-version-的对比" class="headerlink" title="lamport 时间戳与 vector version 的对比"></a>lamport 时间戳与 vector version 的对比</h3><p>概括性的讲，lamport时间戳保证了对于事件a &lt; 事件b 那么C(a) &lt; C(b)但它无法保证若C(a) &lt; C(b) 则 事件a &lt; 事件b，而verctor version在这基础上，进一步保证了若 TS(e1) &lt; TS(e2) 那么 e1 &lt; e2 </p>
+<p>注:TS在这里指timestamp的简写</p>
+<h2 id="REF"><a href="#REF" class="headerlink" title="REF"></a>REF</h2><ul>
+<li><a href="https://blog.csdn.net/yfkiss/article/details/39966087" target="_blank" rel="noopener">site1</a></li>
+<li><a href="https://lrita.github.io/2018/10/24/lamport-logical-clocks-vector-lock/" target="_blank" rel="noopener">site2</a></li>
+<li><a href="https://medium.com/@balrajasubbiah/lamport-clocks-and-vector-clocks-b713db1890d7" target="_blank" rel="noopener">site3</a></li>
+<li>《Time, Clocks, and  the Ordering of Events in a  Distributed System》</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "DDIA读书笔记&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

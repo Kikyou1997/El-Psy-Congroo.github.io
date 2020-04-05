@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>Netty源码学习 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Saturday, January 11th 2020, 6:33 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    6.7k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      26 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="Netty源码学习"><a href="#Netty源码学习" class="headerlink" title="Netty源码学习"></a>Netty源码学习</h1><h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p><img src="/img/event_drived_model.webp" srcset="/img/loading.gif" alt=""></p>
+<p><img src="/img/netty_thread_model.webp" srcset="/img/loading.gif" alt=""><br><img src="/img/reactor_multi_thread_model.webp" srcset="/img/loading.gif" alt=""></p>
+<p><img src="/img/Netty_channel_components.webp" srcset="/img/loading.gif" alt=""></p>
+<p>Rector多线程模型:</p>
+<p>特点：</p>
+<ol>
+<li>有专门一个reactor线程用于监听服务端ServerSocketChannel，接收客户端的TCP连接请求；</li>
+<li>网络IO的读/写操作等由一个worker reactor线程池负责，由线程池中的NIO线程负责监听SocketChannel事件，进行消息的读取、解码、编码和发送。</li>
+<li><strong>一个NIO线程可以同时处理N条链路，但是一个链路只注册在一个NIO线程上处理</strong>，防止发生并发操作问题。</li>
+</ol>
+<p>Netty采取了事件驱动模型设计 其具有如下4个基本组件</p>
+<ul>
+<li><strong>事件队列（event queue）</strong> ：接收事件的入口，存储待处理事件</li>
+<li><strong>分发器（event mediator）</strong> ：将不同的事件分发到不同的业务逻辑单元</li>
+<li><strong>事件通道（event channel）</strong>：分发器与处理器之间的联系渠道</li>
+<li><strong>事件处理器（event processor）</strong>：实现业务逻辑，处理完成后会发出事件，触发下一步操作</li>
+</ul>
+<p>相对传统轮询模式，事件驱动有如下优点：</p>
+<ul>
+<li><strong>可扩展性好</strong>，分布式的异步架构，事件处理器之间高度解耦，可以方便扩展事件处理逻辑</li>
+<li><strong>高性能</strong>，基于队列暂存事件，能方便并行异步处理事件</li>
+</ul>
+<p><img src="/img/event_drived_in_netty.webp" srcset="/img/loading.gif" alt=""></p>
+<h2 id="ServerBootStrap"><a href="#ServerBootStrap" class="headerlink" title="ServerBootStrap"></a>ServerBootStrap</h2><p>来自<a href="https://www.jianshu.com/p/c5068caab217" target="_blank" rel="noopener">简书闪电侠系列文章</a></p>
+<p>例子</p>
+<pre><code class="java">
+    public static void main(String[] args) throws Exception {
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new SimpleServerHandler())
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                        }
+                    });
+
+            ChannelFuture f = b.bind(8888).sync();
+
+            f.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+    }</code></pre>
+<p>EventLoopGroup 一个死循环，不停地检测IO事件，处理IO事件，执行任务</p>
+<p>ServerBootstrap 是服务端的一个启动辅助类，通过给他设置一系列参数来绑定端口启动服务</p>
+<p>group(bossGroup, workerGroup) 我们需要两种类型的人干活，一个是老板，一个是工人，老板负责从外面接活，接到的活分配给工人干，放到这里，bossGroup的作用就是不断地accept到新的连接，将新的连接丢给workerGroup来处理</p>
+<p>.channel(NioServerSocketChannel.class) 表示服务端启动的是nio相关的channel，channel在netty里面是一大核心概念，可以理解为一条channel就是一个连接或者一个服务端bind动作，后面会细说</p>
+<p>.handler(new SimpleServerHandler() 表示服务器启动过程中，需要经过哪些流程，这里SimpleServerHandler最终的顶层接口为ChannelHander，是netty的一大核心概念，表示数据流经过的处理器，可以理解为流水线上的每一道关卡</p>
+<p>childHandler(new ChannelInitializer<SocketChannel>)…表示一条新的连接进来之后，该怎么处理，也就是上面所说的，老板如何给工人配活</p>
+<p>ChannelFuture f = b.bind(8888).sync(); 这里就是真正的启动过程了，绑定8888端口，等待服务器启动完毕，才会进入下行代码</p>
+<p>f.channel().closeFuture().sync(); 等待服务端关闭socket</p>
+<p>bossGroup.shutdownGracefully(); workerGroup.shutdownGracefully(); 关闭两组死循环</p>
+<h2 id="Netty-中的Reactor线程"><a href="#Netty-中的Reactor线程" class="headerlink" title="Netty 中的Reactor线程"></a>Netty 中的Reactor线程</h2><p>来自<a href="https://www.jianshu.com/p/c5068caab217" target="_blank" rel="noopener">简书闪电侠系列文章</a></p>
+<p>netty中最核心的东西莫过于两种类型的reactor线程，可以看作netty中两种类型的发动机，驱动着netty整个框架的运转</p>
+<p>一种类型的reactor线程是boos线程组，专门用来接受新的连接，然后封装成channel对象扔给worker线程组；还有一种类型的reactor线程是worker线程组，专门用来处理连接的读写</p>
+<p>不管是boos线程还是worker线程，所做的事情均分为以下三个步骤</p>
+<ol>
+<li>轮询注册在selector上的IO事件</li>
+<li>处理IO事件</li>
+<li>执行异步task</li>
+</ol>
+<p>对于boos线程来说，第一步轮询出来的基本都是 accept 事件，表示有新的连接，而worker线程轮询出来的基本都是read/write事件，表示网络的读写事件</p>
+<h3 id="处理模式"><a href="#处理模式" class="headerlink" title="处理模式"></a>处理模式</h3><h3 id="NIO-和-BIO"><a href="#NIO-和-BIO" class="headerlink" title="NIO 和 BIO"></a>NIO 和 BIO</h3><p>Netty提供了NIO与BIO(OIO)两种模式处理这些逻辑，其中 <strong>NIO主要通过一个BOSS线程处理等待链接的接入，若干个WORKER线程(从worker线程池中挑选一个赋给Channel实例，因为Channel实例持有真正的java网络对象)接过BOSS线程递交过来的CHANNEL进行数据读写并且触发相应事件传递给pipeline进行数据处理</strong>, 而以SeverBootStrap启动时设置的额bossGroup 和 workerGroup为例来讲 bossGroup的作用就是不断地accept到新的连接，将新的连接丢给workerGroup来处理</p>
+<p>而BIO(OIO)方式服务器端虽然还是通过一个BOSS线程来处理等待链接的接入，但是客户端是由主线程直接connect,另外写数据C/S两端都是直接主线程写，而数据读操作是通过一个WORKER 线程BLOCK方式读取(一直等待，直到读到数据，除非channel关闭)。</p>
+<p>网络动作归结到最简单就是服务器端bind-&gt;accept-&gt;read-&gt;write,客户端 connect-&gt;read-&gt;write,一般bind或者connect后会有多次read、write。这种特性导致，bind,accept与read,write的线程分离，connect与read、write线程分离，这样做的好处就是无论是服务器端还是客户端吞吐量将有效增大，以便充分利用机器的处理能力，而不是卡在网络连接上，不过一旦机器处理能力充分利用后，这种方式反而可能会因为过于频繁的线程切换导致性能损失而得不偿失，并且这种处理模型复杂度比较高。</p>
+<p>采用什么样的网络事件响应处理机制对于网络吞吐量是非常重要的，Netty采用的是标准的SEDA（Staged Event-Driven Architecture）架构[<a href="http://en.wikipedia.org/wiki/" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/</a> Staged_event-driven_architecture]，其所设计的事件类型，代表了网络交互的各个阶段，并且在每个阶段发生时，触发相应事件交给初始化时生成的pipeline实例进行处理。事件处理都是通过Channels类的静态方法调用开始的，将事件、channel传递给 channel持有的Pipeline进行处理，Channels类几乎所有方法都为静态，提供一种Proxy的效果(整个工程里无论何时何地都可以调用其静态方法触发固定的事件流转,但其本身并不关注具体的处理流程)。</p>
+<h2 id="ByteBuf"><a href="#ByteBuf" class="headerlink" title="ByteBuf"></a>ByteBuf</h2><ul>
+<li><p>零拷贝(Zero Copy)</p>
+<p>  OS层次上Zero-copy,就是在操作数据时,不需要将数据buffer从一个内存区域拷贝到另一个内存区域(从内核空间拷贝到用户空间),因为减少了一次内存的拷贝,因此CPU的效率得到了提升.</p>
+<ul>
+<li><p>默认情况下的数据I/O:</p>
+<p>  基本操作就是循环的从磁盘读入文件内容到缓冲区，再将缓冲区的内容发送到socket。但是由于Linux的I/O操作默认是缓冲I/O。这里面主要使用的也就是read和write两个系统调用，我们并不知道操作系统在其中做了什么。实际上在以上I/O操作中，发生了多次的数据拷贝。</p>
+<p>  当应用程序访问某块数据时，操作系统首先会检查，是不是最近访问过此文件，文件内容是否缓存在内核缓冲区，如果是，操作系统则直接根据read系统调用提供的buf地址，将内核缓冲区的内容拷贝到buf所指定的用户空间缓冲区中去。如果不是，操作系统则首先将磁盘上的数据拷贝的内核缓冲区，这一步目前主要依靠DMA来传输，然后再把内核缓冲区上的内容拷贝到用户缓冲区中。<br>  接下来，write系统调用再把用户缓冲区的内容拷贝到网络堆栈相关的内核缓冲区中，最后socket再把内核缓冲区的内容发送到网卡上。</p>
+<p>   <img src="/img/OS_data_copy.webp" srcset="/img/loading.gif" alt=""></p>
+<p>而零拷贝则可以通过<code>mmap</code> <code>sendfile</code> <code>splice</code>等系统调用来减少中间的I/O次数 从而提高cpu的利用效率 关这几种syscall的信息可见<a href="https://www.jianshu.com/p/fad3339e3448" target="_blank" rel="noopener">简书</a></p>
+<p>Netty的zero-copy体现在很多方面.比如Buffer的<code>compose</code>,<code>duplicate</code>,<code>slice</code>操作时不会拷贝底层的数据.而是通过ByteBuf对象的组合来实现上述的操作</p>
+<p>Netty提供了<code>CompositeByteBuf</code>类,可以将多个ByteBuf组合成一个逻辑上的Buffer,避免了各个buffer之间的拷贝,<code>CompositeByteBuf</code>并不拥有底层的数据,而是通过拥有两个buffer对象,从这两个buffer对象中获取数据来对外提供看似合并了的数据.比如我们将一份协议数据的头部buffer和消息体buffer合并成一个Buffer. 所有底层的数据还是存储在header和body这两个真实的buffer中.</p>
+<p>另外Netty使用wrap操作将byte数组转化为ByteBuf对象时,将byte数组包裹到对象中(通过持有该byte数组的引用),而不是拷贝数组存放到对象中.</p>
+<p>这种共享底层数据结构减少复制的内存与CPU开销的设计思想在很多语言中都有所体现 比如Go(Python?的可能也是)中的切片</p>
+<p><img src="/img/netty_composite_buf.webp" srcset="/img/loading.gif" alt=""></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="ByteBuf的回收机制"><a href="#ByteBuf的回收机制" class="headerlink" title="ByteBuf的回收机制"></a>ByteBuf的回收机制</h3><p>Netty在实现ByteBuf时采用了引用计数法进行ByteBuf的回收，使用引用计数法进行回收的ByteBuf都扩展了<code>AbstractReferenceCountedByteBuf</code>类，在使用<code>AbstractReferenceCountedByteBuf</code>时需要调用<br><code>AbstractReferenceCountedByteBuf.retain</code>方法递增引用计数器，在使用完毕时则需要调用<code>AbstractReferenceCountedByteBuf.release</code>方法递减引用计数器，当计数器为0时，会进行ByteBuf的回收工作：池化的ByteBuf不会进行实际的内存释放，会将占用的内存归还给内存池，非池化的ByteBuf则会直接释放内存（为了叙述简单，后面释放内存则指真正释放内存或者将内存归还给内存池）。</p>
+<p>推荐阅读<a href="https://www.jianshu.com/p/7a3bd7b536e6" target="_blank" rel="noopener">该文章</a></p>
+<h2 id="Nettty-NioEventLoop对JAVA-Selector-select可能造成的空循环bug的解决"><a href="#Nettty-NioEventLoop对JAVA-Selector-select可能造成的空循环bug的解决" class="headerlink" title="Nettty NioEventLoop对JAVA Selector.select可能造成的空循环bug的解决"></a>Nettty NioEventLoop对JAVA Selector.select可能造成的空循环bug的解决</h2><p>相关代码位于<code>NioEventLoop::select</code>中</p>
+<p>netty对于发生空循环的判断条件如下:</p>
+<ol>
+<li>selector.select(timeoutMillis) 阻塞时间小于 timeoutMillis，且</li>
+<li>select 执行次数 &gt; 阈值（默认 512） Netty 提供了<code>io.netty.selectorAutoRebuildThreshold</code>参数 可通过此参数设置select操作执行次数的阈值</li>
+</ol>
+<p>检测逻辑:</p>
+<pre><code class="java">                long time = System.nanoTime();
+                if (time - TimeUnit.MILLISECONDS.toNanos(timeoutMillis) &gt;= currentTimeNanos) {
+                    // timeoutMillis elapsed without anything selected.
+                    selectCnt = 1;
+                } else if (SELECTOR_AUTO_REBUILD_THRESHOLD &gt; 0 &amp;&amp;
+                        selectCnt &gt;= SELECTOR_AUTO_REBUILD_THRESHOLD) {
+                    // The selector returned prematurely many times in a row.
+                    // Rebuild the selector to work around the problem.
+                    logger.warn(
+                            &quot;Selector.select() returned prematurely {} times in a row; rebuilding Selector {}.&quot;,
+                            selectCnt, selector);
+                    // 一旦满足上述两个条件就重建selector 并跳出循环
+                    rebuildSelector();
+                    selector = this.selector;
+
+                    // Select again to populate selectedKeys.
+                    selector.selectNow();
+                    selectCnt = 1;
+                    break;
+                }</code></pre>
+<p>重建Selecttor实现在<code>NioEventLoop::rebuildSelector0</code>中 大概做了以下几件事</p>
+<ol>
+<li>新建一个 Selector；</li>
+<li>将旧 Selector 的所有 channel 注册到新 Selector 上；</li>
+<li>关闭旧 Selector；</li>
+</ol>
+<h2 id="番外-关于DirectByteBuffer的回收问题"><a href="#番外-关于DirectByteBuffer的回收问题" class="headerlink" title="[番外]关于DirectByteBuffer的回收问题"></a>[番外]关于DirectByteBuffer的回收问题</h2><p>众所周知 DirectByteBuffer使用的使用的是堆外内存 JVM进行GC时不会对由Unsafe分配的堆外内存进行回收 那么DirectByteBuffer的回收是如何处理的呢?</p>
+<p>其构造函数:</p>
+<pre><code class="java">    DirectByteBuffer(int cap) {                   // package-private
+
+        super(-1, 0, cap, cap);
+        boolean pa = VM.isDirectMemoryPageAligned();
+        int ps = Bits.pageSize();
+        long size = Math.max(1L, (long)cap + (pa ? ps : 0));
+        Bits.reserveMemory(size, cap);
+
+        long base = 0;
+        try {
+            base = unsafe.allocateMemory(size);
+        } catch (OutOfMemoryError x) {
+            Bits.unreserveMemory(size, cap);
+            throw x;
+        }
+        unsafe.setMemory(base, size, (byte) 0);
+        if (pa &amp;&amp; (base % ps != 0)) {
+            // Round up to page boundary
+            address = base + ps - (base &amp; (ps - 1));
+        } else {
+            address = base;
+        }
+        cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
+        att = null;
+    }</code></pre>
+<p>可以看到其通过<code>UNSAFE</code>进行直接内存的分配和初始化 而最后创建的<code>Cleaner</code>与<code>Deallocator</code>则是内存回收的关键</p>
+<p>先说<code>Deallocator</code>其实现了Runnable接口 并在run方法中通过<code>UNSAFE</code>进行内存的释放</p>
+<pre><code class="java">    private static class Deallocator
+        implements Runnable
+    {
+
+        private static Unsafe unsafe = Unsafe.getUnsafe();
+
+        private long address;
+        private long size;
+        private int capacity;
+
+        private Deallocator(long address, long size, int capacity) {
+            assert (address != 0);
+            this.address = address;
+            this.size = size;
+            this.capacity = capacity;
+        }
+
+        public void run() {
+            if (address == 0) {
+                // Paranoia
+                return;
+            }
+            unsafe.freeMemory(address);
+            address = 0;
+            Bits.unreserveMemory(size, capacity);
+        }
+
+    }</code></pre>
+<p>其最后一行<code>Bits.unreserveMemory(size, capacity);</code> 代码的<code>Bits</code>是个包可见的类 而调用的这个方法则是对<code>Bits</code>中记录的一些基础信息进行更新 包括已分配的直接内存大小 已分配的直接内存块数等</p>
+<p>再说这个<code>Clearner</code>其是<code>PhantomReference&lt;Object&gt;</code>(虚引用)的子类</p>
+<p><img src="/img/Cleaner_.png" srcset="/img/loading.gif" alt=""></p>
+<p>其内部通过一个双端链表对所有的Cleaner进行组织</p>
+<pre><code class="java">    // Doubly-linked list of live cleaners, which prevents the cleaners
+    // themselves from being GC&#39;d before their referents
+    //
+    static private Cleaner first = null;
+
+    private Cleaner
+        next = null,
+        prev = null;</code></pre>
+<p><code>Reference</code> 其是所有<code>Reference</code>的父类 本身被组织为队列形式 以其内部的静态字段<code>pending</code>作为队头 在<code>Reference</code>的静态初始化代码段中 启动了一个<code>ReferenceHandler</code>线程 该线程用一个死循环不停的调用<code>tryHandlePending</code>方法 时刻回收被挂到pending上面的虚引用。 当DirectByteBuffer对象仅被Cleaner引用时, Cleaner被放入pending队列, 之后调用Cleaner.clean()队列 </p>
+<pre><code class="java">        ThreadGroup tg = Thread.currentThread().getThreadGroup();
+        for (ThreadGroup tgn = tg;
+             tgn != null;
+             tg = tgn, tgn = tg.getParent());
+        Thread handler = new ReferenceHandler(tg, &quot;Reference Handler&quot;);
+        /* If there were a special system-only priority greater than
+         * MAX_PRIORITY, it would be used here
+         */
+        handler.setPriority(Thread.MAX_PRIORITY);
+        handler.setDaemon(true);
+        handler.start();
+
+        // provide access in SharedSecrets
+        SharedSecrets.setJavaLangRefAccess(new JavaLangRefAccess() {
+            @Override
+            public boolean tryHandlePendingReference() {
+                return tryHandlePending(false);
+            }
+        });</code></pre>
+<p>关于IO操作为什么不直接使用堆内内存:</p>
+<blockquote>
+<p>因为堆内内存会发生GC移动操作, 对象移动后, 其绝对内存地址也会发生改变, 而gc时对象移动操作很频繁, 不可能每次移动堆内数据, IO时缓存的buffer也跟着一起移动 而IO操作直接使用堆外内存则没有了这一限制。同时jvm中IO操作的Buffer必须是DirectBuffer(可查看IO.write/read函数)。–<a href="https://kkewwei.github.io/elasticsearch_learning/2018/07/27/DirectByteBuffer%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E8%AF%A6%E8%A7%A3/" target="_blank" rel="noopener">来自此处</a></p>
+</blockquote>
+<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><p>Netty对内存使用与管理的优化项之一</p>
+<p>由于IO操作通常直接使用直接内存 而直接内存的申请与释放操作开销较大 故通过池化内存减少内存申请与释放的操作 减少垃圾回收的次数 以提高性能</p>
+<p>Netty中四种类型的内存: <code>PoolDirectBuf、UnpoolDirectBuf、PoolHeapBuf、UnpoolHeapBuf</code> m默认使用<code>PoolDirectBuf</code> 这些内存使用<code>PoolArena</code>进行管理</p>
+<p><code>PooledByteBufAllocator</code>中的分配直接内存的操作</p>
+<pre><code class="java">    @Override
+    protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+        PoolThreadCache cache = threadCache.get();
+        PoolArena&lt;ByteBuffer&gt; directArena = cache.directArena;
+
+        final ByteBuf buf;  
+        if (directArena != null) {
+            buf = directArena.allocate(cache, initialCapacity, maxCapacity);
+        } else {
+            buf = PlatformDependent.hasUnsafe() ?
+                    UnsafeByteBufUtil.newUnsafeDirectByteBuf(this, initialCapacity, maxCapacity) :
+                    new UnpooledDirectByteBuf(this, initialCapacity, maxCapacity);
+        }
+
+        return toLeakAwareBuffer(buf);
+    }</code></pre>
+<p>其主要做了两件事:</p>
+<ul>
+<li>获得当前线程的<code>PoolThreadCache</code></li>
+<li>调用当前线程绑定的<code>DirectArena</code>实例的<code>allocate</code>方法分配内存</li>
+</ul>
+<h3 id="PoolArena"><a href="#PoolArena" class="headerlink" title="PoolArena"></a>PoolArena</h3><p>Netty默认会产生<code>NioEventLoop |work|</code>个PoolArena块, 至于该线程绑定哪个PoolArena 则是根据和PoolArena绑定的线程的数量来决定的。 被越少的线程绑定到一起, 分配内存发生冲突的概率越小。 这里选择被绑定次数最低的那个PoolArea来构建PoolThreadCache。<br>至此, 线程与PoolThreadCache实现了一一绑定。 之后该线程分配内存, 都会利用PoolThreadLocalCache.get()获取PoolThreadCache, 然后利用里面的PoolArea来完成的。</p>
+<p>线程分配内存主要从两个地方分配: <code>PoolThreadCache</code>和<code>PoolArena</code> 前者为线程独享 后者为共享</p>
+<p><img src="/img/Netty_Thread_MEM_ALLOCATION.png" srcset="/img/loading.gif" alt=""></p>
+<p>真正申请内存时调用<code>PoolArena::allocate()</code>方法</p>
+<p><code>PoolArena::allocate()</code>分配内存主要考虑先尝试从缓存中, 然后再尝试从PoolArena分配。tiny和small申请过程一样, 以下都以tiny申请为例。具体过程如下:</p>
+<ol>
+<li>对申请的内存进行规范化, 就是说只能申请某些固定大小的内存, 比如tiny范围的16b倍数的内存, small范围内512b, 1k, 2k, 4k范围内存, normal范围内8k, 16k,…, 16m范围内内存, 始终是2幂次方的数据。申请的内存不足16b的,按照16b去申请。</li>
+<li>判断是否是小于8K的内存申请, 若是申请Tiny/Small级别的内存:</li>
+</ol>
+<p>Netty根据申请内存的大小分为了3种情况:</p>
+<pre><code class="java">//定义在PoolArena中
+    enum SizeClass {
+        Tiny,//[16~512)
+        Small,//[512~8K)
+        Normal//[8K-16MB]
+    }</code></pre>
+<p><code>PoolArena</code>的属性:</p>
+<pre><code class="java">//tiny级别的个数, 每次递增2^4b, tiny总共管理32个等级的小内存片:[16, 32, 48, ..., 496], 注意实际只有31个级别内存块
+static final int numTinySubpagePools = 512 &gt;&gt;&gt; 4;
+//全局默认唯一的分配者, 见PooledByteBufAllocator.DEFAULT
+final PooledByteBufAllocator parent;
+// log(16M/8K) = 11,指的是normal类型的内存等级, 分别为[8k, 16k, 32k, ..., 16M]
+private final int maxOrder;
+//默认8k
+final int pageSize;
+//log(8k) =  13
+final int pageShifts;
+//默认16M
+final int chunkSize;
+//-8192
+final int subpageOverflowMask;
+//指的是small类型的内存等级: pageShifts - log(512) = 4,分别为[512, 1k, 2k, 4k]
+final int numSmallSubpagePools;
+ //small类型分31个等级[16, 32, ..., 512], 每个等级都可以存放一个链(元素为PoolSubpage), 可存放未分配的该范围的内存块
+private final PoolSubpage&lt;T&gt;[] tinySubpagePools;
+ //small类型分31个等级[512, 1k, 2k, 4k], 每个等级都可以存放一个链(元素为PoolSubpage), 可存放未分配的该范围的内存块
+private final PoolSubpage&lt;T&gt;[] smallSubpagePools;//存储1024-8096大小的内存
+ //存储chunk(16M)使用率的内存块, 不同使用率的chunk, 存放在不同的对象中
+private final PoolChunkList&lt;T&gt; q050;    ////存储内存利用率50-100%的chunk
+private final PoolChunkList&lt;T&gt; q025;   //存储内存利用率25-75%的chunk
+private final PoolChunkList&lt;T&gt; q000;   //存储内存利用率1-50%的chunk
+private final PoolChunkList&lt;T&gt; qInit;  //存储内存利用率0-25%的chunk
+private final PoolChunkList&lt;T&gt; q075;    //存储内存利用率75-100%的chunk
+private final PoolChunkList&lt;T&gt; q100;   //存储内存利用率100%的chunk
+// Number of thread caches backed by this arena. 该PoolArea被多少线程(NioEventLoop)引用。
+final AtomicInteger numThreadCaches = new AtomicInteger();</code></pre>
+<p>tinySubpagePools分配[16b, 496b]之间的内存大小, 数组中每个元素以16b为一个单位增长, 比如申请分配16b的内存, 将在下标为0对应的链中分配; 申请32b的内存, 将在下标为1对应的链中分配。</p>
+<p>smallSubpagePools分配[512b, 4k]之间的内存大小, 分配结构同tinySubpagePools一样。</p>
+<p>q050、q025、q000、qInit、q075主要负责分配[8k, 16M]大小的内存, 其存放的元素都是大小为16M的PoolChunk, 这几个成员变量不同的是元素PoolChunk的使用率不同, 比如q025里面存放的chunk使用率为[25%, 75%]。 若需要申请[16b, 4k]的内存、而tinySubpagePools、smallSubpagePools没有合适的内存块时, 会从这些对象包含的PoolChunk中分配8k的叶子节点供重新划分结构进行分配。</p>
+<p>他们存储的属性PoolChunk可以在不同的属性中移动, 其中:</p>
+<ul>
+<li>若q025中某个PoolChunk使用率大于25%之后, 该PoolChunk将别移动到q050中。</li>
+<li>若q050中某个PoolChunk使用率小于50%之后, 该PoolChunk将别移动到q025中。</li>
+<li>若qInit使用率为0, 也不会释放该节点。</li>
+<li>若q000使用率为0, 会被释放掉。</li>
+</ul>
+<p>对于大于16MB的内存申请 将直接通过allocateHuge()从内存池外分配内存。</p>
+<p>具体的分配操作:</p>
+<pre><code class="java">    // Method must be called inside synchronized(this) { ... } block
+private void allocateNormal(PooledByteBuf&lt;T&gt; buf, int reqCapacity, int normCapacity) {
+        if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) ||
+            q000.allocate(buf, reqCapacity, normCapacity) || qInit.allocate(buf, reqCapacity, normCapacity) ||
+            q075.allocate(buf, reqCapacity, normCapacity)) {
+            return;
+        }
+
+        // Add a new chunk.
+        PoolChunk&lt;T&gt; c = newChunk(pageSize, maxOrder, pageShifts, chunkSize);
+        long handle = c.allocate(normCapacity);
+        assert handle &gt; 0;
+        c.initBuf(buf, handle, reqCapacity);
+        qInit.add(c);
+    }
+
+boolean allocate(PooledByteBuf&lt;T&gt; buf, int reqCapacity, int normCapacity) {
+    if (head == null || normCapacity &gt; maxCapacity) { //head是可以直接寸数据的
+        // Either this PoolChunkList is empty or the requested capacity is larger then the capacity which can
+        // be handled by the PoolChunks that are contained in this PoolChunkList.
+        return false;
+    }
+    for (PoolChunk&lt;T&gt; cur = head;;) {
+        long handle = cur.allocate(normCapacity); //取得哪个坐标下的某个值
+        if (handle &lt; 0) { //在poolchunk中没有找到能装得下的，那么继续找下一个
+            cur = cur.next;
+            if (cur == null) {
+                return false;
+            }
+        } else {
+            cur.initBuf(buf, handle, reqCapacity);
+            if (cur.usage() &gt;= maxUsage) {//chunked量用超了则移动向下一个链
+                remove(cur);
+                nextList.add(cur);
+            }
+            return true;
+        }
+    }
+}</code></pre>
+<p>会轮训该链所有PoolChunk, 直到找到一个符合要求的内存块, 当分配完成后, 检查该PoolChunk是否因为使用率超过阈值需要放到别的队列中。</p>
+<p>若没有找到, 会去内存中申请一个PoolChunk的内存块, 在该PoolChunk中分配normCapacity大小的内存, 参考见Netty PoolChunk原理探究<br>对PoolChunk进行初始化, 并将该PoolChunk加入qInit的链中。</p>
+<p>这里有一个细节需要了解下 注意<code>allocateNormal</code>的<code>if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) || q000.allocate(buf, reqCapacity, normCapacity) || qInit.allocate(buf, reqCapacity, normCapacity) || q075.allocate(buf, reqCapacity, normCapacity)) { return; }</code>语句, <strong>q050、q025、q000、qInit、q075按照这个顺序排序, 也就是说当在这几个对象都有可分配的内存时, 优先从 q050中分配, 最后从q075中分配。这样安排的考虑是:将PoolChunk分配维持在较高的比例上。保存一些空闲度比较大的内存, 以便大内存的分配。</strong></p>
+<h3 id="PoolChunk"><a href="#PoolChunk" class="headerlink" title="PoolChunk"></a>PoolChunk</h3><p>对于大于8K的内存申请Netty采用<code>PoolChunk</code>处理</p>
+<p>Netty进行内存分配分配时默认一次分配16MB的通过<code>PoolChunk</code>(<code>PoolChunk</code>本身则是双端链表的一个节点)组织的内存 <code>PoolChunk</code>通过<strong>完全二叉平衡树</strong>来对内存进行管理 当申请一块内存块时 会在树中进行查找 并将找到的第一块足够大小的内存区域 以long型的偏移量形式返回 然后将该内存块标记为<code>reserved</code> 以确保该内存块只被一个<code>ByteBuf</code>所使用 若申请的内存大小大于<code>chunkSize</code>则返回大于申请内存的最接近该值的2的幂次方的内存区域 以简化内存块的管理和内存区域的规整</p>
+<p>该二叉树将PoolChunk分11层, 第一层为1个16M, 第二层为2个8MB,第三层为4个4MB的内存块, 直到第11层为2048个8KB的内存块, 8kb的内存块称之为page。</p>
+<ul>
+<li>如果我们申请16M的内存, 那么将直接在该二叉树第一层申请。</li>
+<li>若申请32K的内存, 那么在该二叉树第8层申请。</li>
+<li>若申请8K的内存, 那么将直接在第11层申请。</li>
+</ul>
+<p><img src="/img/Netty_PoolChunk_struct.png" srcset="/img/loading.gif" alt=""></p>
+<p>该二叉平衡树被编码为数组形式的<code>meomoryMap</code> <code>memoryMap[id] = x</code>意味着根节点位于该<code>id</code>的子树 的第一个可用内存块位于深度<code>x</code> (in the subtree rooted at id, the first node that is free to be allocated is at depth x (counted from depth=0))</p>
+<p>当我们分配和释放节点的时候就对该<code>memoryMap</code>进行更新</p>
+<p><code>memoryMap</code>按如下初始化:<code>memoryMap[id] = depth_of_id</code></p>
+<p>对于每个子树有如下规则</p>
+<ul>
+<li><code>memoryMap[id] = depth_of_id</code>  =&gt; 以该节点为根节点节点的子树上所有的块都还没有被分配</li>
+<li><code>memoryMap[id] &gt; depth_of_id</code>  =&gt; 至少有一块被分配了 但是仍有可能存在未被分配的块</li>
+<li><code>memoryMap[id] = maxOrder + 1</code> =&gt; 所有节点都被分配 maxOrder为整个二叉平衡数的深度</li>
+</ul>
+<p>另外Netty的很多初始化元信息都位于<code>PlatformDependent</code>final类中 该类包括了 当前运行系统 最大堆外内存量(默认与堆内内存大小相等) 优先使用堆内内存 还是堆外内存等</p>
+<p><a href="https://kkewwei.github.io/elasticsearch_learning/2019/01/12/Netty%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%8E%9F%E7%90%86%E8%A7%A3%E8%AF%BB/" target="_blank" rel="noopener">关于堆外内存的回收流程</a></p>
+<p><img src="/img/Netty_direct_memory_recycle.png" srcset="/img/loading.gif" alt=""></p>
+<h3 id="PoolSubPage"><a href="#PoolSubPage" class="headerlink" title="PoolSubPage"></a>PoolSubPage</h3><p>Netty中申请小于8K的内存 将使用<code>PoolSubpage</code> 以避免内存浪费 </p>
+<p>每一个PoolSubpage都会与PoolChunk里面的一个叶子节点映射起来, 然后将PoolSubpage根据用户申请的ElementSize化成几等分, 之后只要再次申请ElementSize大小的内存, 将直接从这个PoolSubpage中分配。(遍历bitmap找到还未使用的即可)</p>
+<pre><code class="java">    PoolSubpage(PoolSubpage&lt;T&gt; head, PoolChunk&lt;T&gt; chunk, int memoryMapIdx, int runOffset, int pageSize, int elemSize) {
+        this.chunk = chunk;
+        this.memoryMapIdx = memoryMapIdx;
+        this.runOffset = runOffset;
+        this.pageSize = pageSize;
+        bitmap = new long[pageSize &gt;&gt;&gt; 10]; // pageSize / 16 / 64
+        init(head, elemSize);
+    }
+
+    void init(PoolSubpage&lt;T&gt; head, int elemSize) {
+        doNotDestroy = true;
+        this.elemSize = elemSize;
+        if (elemSize != 0) {
+            maxNumElems = numAvail = pageSize / elemSize;
+            nextAvail = 0;
+            bitmapLength = maxNumElems &gt;&gt;&gt; 6;
+            if ((maxNumElems &amp; 63) != 0) {
+                bitmapLength ++;
+            }
+
+            for (int i = 0; i &lt; bitmapLength; i ++) {
+                bitmap[i] = 0;
+            }
+        }
+        addToPool(head);
+    }</code></pre>
+<p>关于<code>bitmap = new long[pageSize &gt;&gt;&gt; 10];</code></p>
+<p>一个long型有64个位 2的6次方 而Netty申请内存的最小单位是16Bytes=2的四次方 故最多只需要pageSize &gt;&gt;&gt; 10 个long 作为位图 就能够准确的表示所申请的page的使用情况</p>
+<p>然后再调用init来对PoolSubpage结构进行初始化:</p>
+<ol>
+<li>总共可以分成pageSize/elemSize个element。 bitmap所有元素也不一定需要全部用上, 实际会用maxNumElems &gt;&gt;&gt; 6个long就可以了。</li>
+<li>然后根据头插法将该PoolSubpage插入tinySubpagePools或者smallSubpagePools(参考Netty PoolArea原理探究)对应级别的链中。</li>
+</ol>
+<h3 id="PoolThreadCache"><a href="#PoolThreadCache" class="headerlink" title="PoolThreadCache"></a>PoolThreadCache</h3><p>NioEventLoop在为数据分配存放的内存时, 会首先尝试从线程本地缓存中去申请, 只有当本地缓存中申请失败, 才会考虑从全局内存中申请, 本地缓存的管理者就是PoolThreadCache对象。 Netty自己实现了类似LocalThread的类来充当线程缓存: PoolThreadLocalCache, 本节将充分围绕这两个类的源代码进行描述。</p>
+<p><img src="/img/Netty_PoolThreadCache2.png" srcset="/img/loading.gif" alt=""></p>
+<p><code>normalHeapCaches</code>只缓存[8k, 16k, 32k]大小的内存块, 每个元素对应的缓存queue个数不超过64个。 normal最大内存块为16m, 而缓存仅仅缓存最大32k内存的原因是这是一种巨大的开销: 试想仅仅16m对应的级别存储, 就可缓存16M*64大小的内存块放在内存, 而这些内存块等着被新分配出去而没有主动释放, 存在巨大的浪费。</p>
+<p><code>PoolThreadCache</code>的构造函数 可以看出directArena与PoolThreadCache绑定了, 同时PoolThreadCache也与某个NioEventLoop对应的线程绑定的, 所以该NioEventLoop线程都与唯一的directArena(&amp;heapArena)绑定着, 这样相对减轻了线程间申请内存导致互斥的发生。</p>
+<pre><code class="java">private static &lt;T&gt; MemoryRegionCache&lt;T&gt;[] createNormalCaches(
+           int cacheSize, int maxCachedBufferCapacity, PoolArena&lt;T&gt; area) {
+       if (cacheSize &gt; 0) {
+           int max = Math.min(area.chunkSize, maxCachedBufferCapacity); //默认32k
+           //normalHeapCaches 数组中的元素的大小，是以2的幂倍pageSize递增的
+           int arraySize = Math.max(1, log2(max / area.pageSize) + 1);
+           //只缓存8k，16k，32k的缓存，太大的话，内存扛不住，若最大缓存32m的话，缓存64*32M个，太大了，扛不住
+           @SuppressWarnings(&quot;unchecked&quot;)
+           MemoryRegionCache&lt;T&gt;[] cache = new MemoryRegionCache[arraySize];
+           for (int i = 0; i &lt; cache.length; i++) {
+               cache[i] = new NormalMemoryRegionCache&lt;T&gt;(cacheSize);
+           }
+           return cache;
+       } else {
+           return null;
+       }
+   }</code></pre>
+<p>PoolThreadCache主要解决了了如何从本地缓存分配内存, 而本地缓存如何与该线程联系在一起的呢? 这就是<code>PoolThreadLocalCache起</code>的作用。</p>
+<p><code>PoolThreadLocalCache</code>是<strong>全局唯一</strong>的, 任何线程分配内存, 都会调用同一个PoolThreadLocalCache.get()获取PoolThreadCache。 PoolThreadLocalCache继承了FastThreadLocal, PoolThreadLocalCache.get()实际调用了FastThreadLocal.get()方法:</p>
+<pre><code class="java">    public final V get() {
+        return get(InternalThreadLocalMap.get());
+    }</code></pre>
+<p>在InternalThreadLocalMap中定义了slowThreadLocalMap属性, 该类型是我们熟悉的ThreadLocal。</p>
+<pre><code class="java">static final ThreadLocal&lt;InternalThreadLocalMap&gt; slowThreadLocalMap = new ThreadLocal&lt;InternalThreadLocalMap&gt;();</code></pre>
+<p>而该方法经过一系列调用链最终会调用<code>PoolThreadLocalCache</code>的<code>initValue</code>方法</p>
+<pre><code class="java">        @Override
+        protected synchronized PoolThreadCache initialValue() {
+            final PoolArena&lt;byte[]&gt; heapArena = leastUsedArena(heapArenas);
+            final PoolArena&lt;ByteBuffer&gt; directArena = leastUsedArena(directArenas);
+
+            if (useCacheForAllThreads || Thread.currentThread() instanceof FastThreadLocalThread) {
+                return new PoolThreadCache(
+                        heapArena, directArena, tinyCacheSize, smallCacheSize, normalCacheSize,
+                        DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
+            }
+            // No caching for non FastThreadLocalThreads.
+            return new PoolThreadCache(heapArena, directArena, 0, 0, 0, 0, 0);
+        }</code></pre>
+<h2 id="REF"><a href="#REF" class="headerlink" title="REF"></a>REF</h2><p>以上内容整理自</p>
+<ul>
+<li><a href="http://jm.taobao.org/2010/09/25/423/" target="_blank" rel="noopener">http://jm.taobao.org/2010/09/25/423/</a></li>
+<li><a href="https://www.jianshu.com/c/3a70d53ebdf3" target="_blank" rel="noopener">简书Netty系列文章</a>For simplicity all sizes are no</li>
+<li><a href="https://kkewwei.github.io/elasticsearch_learning/categories/Netty/" target="_blank" rel="noopener">kkewwei的github pages</a></li>
+<li>Netty文档</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Netty/">Netty</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Netty源码学习&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

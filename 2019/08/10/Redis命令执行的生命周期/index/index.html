@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>Redis命令执行周期 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Saturday, August 10th 2019, 10:55 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    2.8k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      14 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="Redis命令执行周期"><a href="#Redis命令执行周期" class="headerlink" title="Redis命令执行周期"></a>Redis命令执行周期</h1><p>Redis是典型的事件驱动程序 事件处理显得更为重要 Redis将事件分为两大类:</p>
+<ol>
+<li><em>文件事件</em> socket的读写事件</li>
+<li><em>时间事件</em> 用于处理一些需要周期性执行的定时任务</li>
+</ol>
+<p><img src="/img/redis_objtype_datastrcuture.png" srcset="/img/loading.gif" alt=""></p>
+<p><strong>注意双向链表已不再使用</strong> 且zset有序列表有时还会用到hash类型 将hash和skiplist结合使用 这样可以将查找特定元素的操作的时间开销缩小到O(1) 而<code>zrange</code> <code>zrank</code>等命令的复杂度仍为O(logN) 也就是结合了两者的优点 略微牺牲了一些空间 达到更好的综合性能</p>
+<p><code>server.h</code>中的zset结构定义如下</p>
+<pre><code class="c">typedef struct zset {
+    dict *dict;
+    zskiplist *zsl;
+} zset;</code></pre>
+<p>Redis中的五种基本数据类型在<code>server.h</code>中的宏定义</p>
+<pre><code class="c">/* The actual Redis Object */
+#define OBJ_STRING 0    /* String object. */
+#define OBJ_LIST 1      /* List object. */
+#define OBJ_SET 2       /* Set object. */
+#define OBJ_ZSET 3      /* Sorted set object. */
+#define OBJ_HASH 4      /* Hash object. */</code></pre>
+<p>这5种类型在redis中都用<code>robj</code>来封装</p>
+<pre><code class="c">typedef struct redisObject {
+    unsigned type:4;// 记录其封装的是哪种类型的数据
+    unsigned encoding:4;// 编码方式
+    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
+                            * LFU data (least significant 8 bits frequency
+                            * and most significant 16 bits access time). */
+    int refcount;//引用计数
+    void *ptr;
+} robj;</code></pre>
+<p><code>ptr</code>字段指向某一实际的数据结构 可以看到创建某一个数据结构的实例时 需要创建robj和其本身 需要分配两次内存 两次内存分配操作效率低, 而且数据分离存储降低了计算机高速缓存的效率 对于sds较短的情况下得不偿失</p>
+<p>而上图中字符串的<code>embstr</code> 则意味着 robj与<code>sds</code>一次分配完毕 连续存储</p>
+<p>客户端结构体:</p>
+<pre><code class="c">typedef struct client {
+    uint64_t id;            /* Client incremental unique ID. */
+    connection *conn;
+    int resp;               /* RESP protocol version. Can be 2 or 3. */
+    redisDb *db;            /* Pointer to currently SELECTed DB. */
+    robj *name;             /* As set by CLIENT SETNAME. */
+    sds querybuf;           /* Buffer we use to accumulate client queries. */
+    size_t qb_pos;          /* The position we have read in querybuf. */
+    sds pending_querybuf;   /* If this client is flagged as master, this buffer
+                               represents the yet not applied portion of the
+                               replication stream that we are receiving from
+                               the master. */
+    size_t querybuf_peak;   /* Recent (100ms or more) peak of querybuf size. */
+    int argc;               /* Num of arguments of current command. */
+    robj **argv;            /* Arguments of current command. */
+    struct redisCommand *cmd, *lastcmd;  /* Last command executed. */
+    user *user;             /* User associated with this connection. If the
+                               user is set to NULL the connection can do
+                               anything (admin). */
+    int reqtype;            /* Request protocol type: PROTO_REQ_* */
+    int multibulklen;       /* Number of multi bulk arguments left to read. */
+    long bulklen;           /* Length of bulk argument in multi bulk request. */
+    list *reply;            /* List of reply objects to send to the client. */
+    unsigned long long reply_bytes; /* Tot bytes of objects in reply list. */
+    size_t sentlen;         /* Amount of bytes already sent in the current
+                               buffer or object being sent. */
+    time_t ctime;           /* Client creation time. */
+    time_t lastinteraction; /* Time of the last interaction, used for timeout */
+    time_t obuf_soft_limit_reached_time;
+    uint64_t flags;         /* Client flags: CLIENT_* macros. */
+    int authenticated;      /* Needed when the default user requires auth. */
+    int replstate;          /* Replication state if this is a slave. */
+    int repl_put_online_on_ack; /* Install slave write handler on first ACK. */
+    int repldbfd;           /* Replication DB file descriptor. */
+    off_t repldboff;        /* Replication DB file offset. */
+    off_t repldbsize;       /* Replication DB file size. */
+    sds replpreamble;       /* Replication DB preamble. */
+    long long read_reploff; /* Read replication offset if this is a master. */
+    long long reploff;      /* Applied replication offset if this is a master. */
+    long long repl_ack_off; /* Replication ack offset, if this is a slave. */
+    long long repl_ack_time;/* Replication ack time, if this is a slave. */
+    long long psync_initial_offset; /* FULLRESYNC reply offset other slaves
+                                       copying this slave output buffer
+                                       should use. */
+    char replid[CONFIG_RUN_ID_SIZE+1]; /* Master replication ID (if master). */
+    int slave_listening_port; /* As configured with: SLAVECONF listening-port */
+    char slave_ip[NET_IP_STR_LEN]; /* Optionally given by REPLCONF ip-address */
+    int slave_capa;         /* Slave capabilities: SLAVE_CAPA_* bitwise OR. */
+    multiState mstate;      /* MULTI/EXEC state */
+    int btype;              /* Type of blocking op if CLIENT_BLOCKED. */
+    blockingState bpop;     /* blocking state */
+    long long woff;         /* Last write global replication offset. */
+    list *watched_keys;     /* Keys WATCHED for MULTI/EXEC CAS */
+    dict *pubsub_channels;  /* channels a client is interested in (SUBSCRIBE) */
+    list *pubsub_patterns;  /* patterns a client is interested in (SUBSCRIBE) */
+    sds peerid;             /* Cached peer ID. */
+    listNode *client_list_node; /* list node in client list */
+
+    /* If this client is in tracking mode and this field is non zero,
+     * invalidation messages for keys fetched by this client will be send to
+     * the specified client ID. */
+    uint64_t client_tracking_redirection;
+
+    /* Response buffer */
+    int bufpos;
+    char buf[PROTO_REPLY_CHUNK_BYTES];
+} client;</code></pre>
+<p><code>redisDb</code>结构体表示</p>
+<pre><code class="c">/* Redis database representation. There are multiple databases identified
+ * by integers from 0 (the default database) up to the max configured
+ * database. The database number is the &#39;id&#39; field in the structure. */
+typedef struct redisDb {
+    dict *dict;                 /* The keyspace for this DB */
+    dict *expires;              /* Timeout of keys with a timeout set */
+    dict *blocking_keys;        /* Keys with clients waiting for data (BLPOP)*/
+    dict *ready_keys;           /* Blocked keys that received a PUSH */
+    dict *watched_keys;         /* WATCHED keys for MULTI/EXEC CAS */
+    int id;                     /* Database ID */
+    long long avg_ttl;          /* Average TTL, just for stats */
+    unsigned long expires_cursor; /* Cursor of the active expire cycle. */
+    list *defrag_later;         /* List of key names to attempt to defrag one by one, gradually. */
+} redisDb;</code></pre>
+<p>Redis支持通过命令<code>MULTI</code>开启事务 <code>EXEC</code>来执行事务 REDIS采用乐观锁机制 开启事务的同时可以使用<code>WATCH [key]</code>的命令监控关心的数据键 而<code>watch_keys</code>字段就是存储的被<code>watch</code>命令监控的所有数据键 其中<code>key-value</code>分别为数据键与客户端对象 当redis服务器接收到写命令时 会从该字典查找该数据键 找到说明正有客户端在监控此数据键 于是标记客户端对象为dirty 待REDIS收到该客户端的额EXEC命令时 如果客户端带有dirty标记 则会拒接执行事务</p>
+<p>服务端结构体<code>redisServer</code>也定义在<code>server.h</code>中 要素过多不再展示</p>
+<h2 id="事件处理"><a href="#事件处理" class="headerlink" title="事件处理"></a>事件处理</h2><p>各类事件的结构体定义在<code>ae.h</code>中 并将其封装在<code>aeEventLoop</code>中</p>
+<pre><code class="c">/* File event structure */
+typedef struct aeFileEvent {
+    int mask; /* one of AE_(READABLE|WRITABLE|BARRIER) */
+    aeFileProc *rfileProc;// 读事件的处理函数指针
+    aeFileProc *wfileProc;// 写事件的处理函数指针
+    void *clientData;
+} aeFileEvent;
+
+/* Time event structure */
+typedef struct aeTimeEvent {
+    long long id; /* time event identifier. */
+    long when_sec; /* seconds */
+    long when_ms; /* milliseconds */
+    aeTimeProc *timeProc;
+    aeEventFinalizerProc *finalizerProc;
+    void *clientData;
+    struct aeTimeEvent *prev;
+    struct aeTimeEvent *next;
+} aeTimeEvent;
+
+/* A fired event */
+typedef struct aeFiredEvent {
+    int fd;
+    int mask;
+} aeFiredEvent;
+
+/* State of an event based program */
+typedef struct aeEventLoop {
+    int maxfd;   /* highest file descriptor currently registered */
+    int setsize; /* max number of file descriptors tracked */
+    long long timeEventNextId;
+    time_t lastTime;     /* Used to detect system clock skew */
+    aeFileEvent *events; /* Registered events */
+    aeFiredEvent *fired; /* Fired events 数组结构*/
+    aeTimeEvent *timeEventHead; // 链表结构
+    int stop; // 标记事件循环是否结束
+    void *apidata; /* This is used for polling API specific data 对4种I/O多路复用模型的封装*/
+    aeBeforeSleepProc *beforesleep;// 进程阻塞前调用
+    aeBeforeSleepProc *aftersleep; // 进程被唤醒后调用
+    int flags;
+} aeEventLoop;</code></pre>
+<p>事件驱动程序通常存在<code>while/for</code>循环 循环等在事件发生并处理 Redis中的事件循环如下</p>
+<pre><code class="c">
+void aeMain(aeEventLoop *eventLoop) {
+    eventLoop-&gt;stop = 0;
+    while (!eventLoop-&gt;stop) {
+        if (eventLoop-&gt;beforesleep != NULL)
+            eventLoop-&gt;beforesleep(eventLoop);
+        aeProcessEvents(eventLoop, AE_ALL_EVENTS|AE_CALL_AFTER_SLEEP);
+    }
+}</code></pre>
+<p><code>AE_ALL_EVENTS</code>表示 该函数需要处理文件和时间事件<br><code>AE_CALL_AFTER_SLEEP</code> 表示阻塞等待文件事件后需要执行<code>afterSleep</code>函数</p>
+<h3 id="关于epoll"><a href="#关于epoll" class="headerlink" title="关于epoll"></a>关于epoll</h3><p>Linux内核为处理大量并发网络连接而提供的解决方案 能够显著提高系统CPU利用率 其主要有3个API</p>
+<ul>
+<li><code>epoll_create</code> 该函数创建一个epoll专用的文件描述符</li>
+<li><code>epoll_wait</code> 该函数阻塞进程 直到监控的若干个网络连接有事件发生</li>
+<li><code>epoll_ctl</code> 注册修改或删除需要监控的事件</li>
+</ul>
+<p>具体参数及用途可见<code>ehall.h</code></p>
+<p>redis并没有直接使用epoll提供的api而是对<code>evport, epoll, kqueue, ae_select</code> 四种I/O多路复用模型进行了统一封装 具体的代码实现在<code>ae_[model].c</code>中 编译时会检查OS支持的I/O多路复用模型 根据一定规则进行选择</p>
+<p>Redis服务器启动时需要创建socket并监听 等待客户端连接 客户端与服务器建立socket连接之后 服务器会等待客户端的命令请求 服务器处理完客户端的命令请求之后会将回复暂存在client结构体的buf缓冲区 待客户端文件描述符的可写事件发生时才会真正往客户端发送命令回复 这些都需要创建对应的文件事件</p>
+<p>如在<code>server.c</code>的<code>initServer</code>方法中调用该方位 并设置客户端连接的处理函数为<code>acceptTcpHandler</code></p>
+<pre><code class="c">aeCreateFileEvent(server.el, server.ipfd[j], AE_READABLE,
+            acceptTcpHandler,NULL);</code></pre>
+<p>事件循环的处理函数</p>
+<pre><code class="c">/* Process every pending time event, then every pending file event
+ * (that may be registered by time event callbacks just processed).
+ * Without special flags the function sleeps until some file event
+ * fires, or when the next time event occurs (if any).
+ *
+ * If flags is 0, the function does nothing and returns.
+ * if flags has AE_ALL_EVENTS set, all the kind of events are processed.
+ * if flags has AE_FILE_EVENTS set, file events are processed.
+ * if flags has AE_TIME_EVENTS set, time events are processed.
+ * if flags has AE_DONT_WAIT set the function returns ASAP until all
+ * the events that&#39;s possible to process without to wait are processed.
+ * if flags has AE_CALL_AFTER_SLEEP set, the aftersleep callback is called.
+ *
+ * The function returns the number of events processed. */
+int aeProcessEvents(aeEventLoop *eventLoop, int flags)
+{
+    int processed = 0, numevents;
+
+    /* Nothing to do? return ASAP */
+    if (!(flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_FILE_EVENTS)) return 0;
+
+    /* Note that we want call select() even if there are no
+     * file events to process as long as we want to process time
+     * events, in order to sleep until the next time event is ready
+     * to fire. */
+    if (eventLoop-&gt;maxfd != -1 ||
+        ((flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_DONT_WAIT))) {
+        int j;
+        aeTimeEvent *shortest = NULL;
+        struct timeval tv, *tvp;
+
+        if (flags &amp; AE_TIME_EVENTS &amp;&amp; !(flags &amp; AE_DONT_WAIT))
+            shortest = aeSearchNearestTimer(eventLoop);
+        if (shortest) {
+            long now_sec, now_ms;
+
+            aeGetTime(&amp;now_sec, &amp;now_ms);
+            tvp = &amp;tv;
+
+            /* How many milliseconds we need to wait for the next
+             * time event to fire? */
+            long long ms =
+                (shortest-&gt;when_sec - now_sec)*1000 +
+                shortest-&gt;when_ms - now_ms;
+
+            if (ms &gt; 0) {
+                tvp-&gt;tv_sec = ms/1000;
+                tvp-&gt;tv_usec = (ms % 1000)*1000;
+            } else {
+                tvp-&gt;tv_sec = 0;
+                tvp-&gt;tv_usec = 0;
+            }
+        } else {
+            /* If we have to check for events but need to return
+             * ASAP because of AE_DONT_WAIT we need to set the timeout
+             * to zero */
+            if (flags &amp; AE_DONT_WAIT) {
+                tv.tv_sec = tv.tv_usec = 0;
+                tvp = &amp;tv;
+            } else {
+                /* Otherwise we can block */
+                tvp = NULL; /* wait forever */
+            }
+        }
+
+        if (eventLoop-&gt;flags &amp; AE_DONT_WAIT) {
+            tv.tv_sec = tv.tv_usec = 0;
+            tvp = &amp;tv;
+        }
+
+        /* Call the multiplexing API, will return only on timeout or when
+         * some event fires. */
+        numevents = aeApiPoll(eventLoop, tvp);
+
+        /* After sleep callback. */
+        if (eventLoop-&gt;aftersleep != NULL &amp;&amp; flags &amp; AE_CALL_AFTER_SLEEP)
+            eventLoop-&gt;aftersleep(eventLoop);
+
+        for (j = 0; j &lt; numevents; j++) {
+            aeFileEvent *fe = &amp;eventLoop-&gt;events[eventLoop-&gt;fired[j].fd];
+            int mask = eventLoop-&gt;fired[j].mask;
+            int fd = eventLoop-&gt;fired[j].fd;
+            int fired = 0; /* Number of events fired for current fd. */
+
+            /* Normally we execute the readable event first, and the writable
+             * event laster. This is useful as sometimes we may be able
+             * to serve the reply of a query immediately after processing the
+             * query.
+             *
+             * However if AE_BARRIER is set in the mask, our application is
+             * asking us to do the reverse: never fire the writable event
+             * after the readable. In such a case, we invert the calls.
+             * This is useful when, for instance, we want to do things
+             * in the beforeSleep() hook, like fsynching a file to disk,
+             * before replying to a client. */
+            int invert = fe-&gt;mask &amp; AE_BARRIER;
+
+            /* Note the &quot;fe-&gt;mask &amp; mask &amp; ...&quot; code: maybe an already
+             * processed event removed an element that fired and we still
+             * didn&#39;t processed, so we check if the event is still valid.
+             *
+             * Fire the readable event if the call sequence is not
+             * inverted. */
+            if (!invert &amp;&amp; fe-&gt;mask &amp; mask &amp; AE_READABLE) {
+                fe-&gt;rfileProc(eventLoop,fd,fe-&gt;clientData,mask);
+                fired++;
+            }
+
+            /* Fire the writable event. */
+            if (fe-&gt;mask &amp; mask &amp; AE_WRITABLE) {
+                if (!fired || fe-&gt;wfileProc != fe-&gt;rfileProc) {
+                    fe-&gt;wfileProc(eventLoop,fd,fe-&gt;clientData,mask);
+                    fired++;
+                }
+            }
+
+            /* If we have to invert the call, fire the readable event now
+             * after the writable one. */
+            if (invert &amp;&amp; fe-&gt;mask &amp; mask &amp; AE_READABLE) {
+                if (!fired || fe-&gt;wfileProc != fe-&gt;rfileProc) {
+                    fe-&gt;rfileProc(eventLoop,fd,fe-&gt;clientData,mask);
+                    fired++;
+                }
+            }
+
+            processed++;
+        }
+    }
+    /* Check time events */
+    if (flags &amp; AE_TIME_EVENTS)
+        processed += processTimeEvents(eventLoop);
+
+    return processed; /* return the number of processed file/time events */
+}</code></pre>
+<p>简单的来讲 该函数会先遍历<code>eventLoop</code>的时间事件链表 找出最近下个时间事件触发的时间 并在该时间与当前时间的差值作为 <code>aeApiPoll</code>的最长阻塞时间</p>
+<p><code>aeApiApoll</code>阻塞等待文件事件发生 其调用<code>epoll_wait</code> 而传入给<code>aeApiPoll</code>的tvp参数将作为<code>epoll_wait</code>的超时参数以ms为单位 <code>epoll_wait</code>在每次轮询时会检查是否已经达到该时间如果达到则返回之</p>
+<p>然后<code>aeApiPoll</code>将获得事件(<code>aeApiState</code>的<code>events</code>数组)置到<code>eventLoop</code>的<code>fired</code>数组中 并进行行管的属性设置 如事件类型的设置等等</p>
+<p>随后返回到<code>aeProcessEvent</code>函数中 由该函数对已触发的文件事件进行进一步的处理</p>
+<p>最后<code>aeProcessEvent</code>处理时间事件</p>
+<h2 id="时间事件"><a href="#时间事件" class="headerlink" title="时间事件"></a>时间事件</h2><p>Redis中只有一个时间事件在<code>server.c</code>的<code>initServer</code>函数中调用</p>
+<pre><code class="c">aeCreateTimeEvent(server.el, 1, serverCron, NULL, NULL) </code></pre>
+<p>用户可以设置<code>serverCron</code>函数的执行频率 其对应<code>server.hz</code>字段 最小为1 最大为500 默认为10 该函数会根据执行频率进行一些相关的操作 此外还会无条件执行诸如清除过期客户端 过期键等操作</p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/C/">C</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Redis/">Redis</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Redis命令执行周期&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

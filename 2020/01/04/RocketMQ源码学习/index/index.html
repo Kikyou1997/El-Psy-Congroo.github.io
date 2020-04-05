@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>RocketMq 技术内幕读书笔记 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Saturday, January 4th 2020, 5:01 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    10.2k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      40 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="RocketMq-技术内幕读书笔记"><a href="#RocketMq-技术内幕读书笔记" class="headerlink" title="RocketMq 技术内幕读书笔记"></a>RocketMq 技术内幕读书笔记</h1><h2 id="NameServer路由"><a href="#NameServer路由" class="headerlink" title="NameServer路由"></a>NameServer路由</h2><p><img src="/img/ns_route_reg_del.png" srcset="/img/loading.gif" alt="route"></p>
+<p>NameServer存储了路由表及相关的元数据</p>
+<p>NameServer相关的两个比较重要的类:</p>
+<ol>
+<li><code>org.apache.rocketmq.namesrv.routeinfo.RouteInfoManager</code>存储/管理若干路由数据</li>
+<li><code>org.apache.rocketmq.namesrv.NamesrvController</code></li>
+</ol>
+<p><code>RouteInfoManager</code>所存储的信息包括</p>
+<pre><code class="java">private final HashMap&lt;String/* topic */, List&lt;QueueData&gt;&gt; topicQueueTable;
+private final HashMap&lt;String/* brokerName */, BrokerData&gt; brokerAddrTable;
+private final HashMap&lt;String/* clusterName */, Set&lt;String/* brokerName */&gt;&gt; clusterAddrTable;
+private final HashMap&lt;String/* brokerAddr */, BrokerLiveInfo&gt; brokerLiveTable;
+private final HashMap&lt;String/* brokerAddr */, List&lt;String&gt;/* Filter Server */&gt; filterServerTable;</code></pre>
+<p><code>brokerLiveTable</code>用于记录Broker的状态信息 ns每次收到心跳包时会替换该信息 <code>BrokerLiveInfo</code>的<code>lastUpdateTimestamp</code>字段记录了上次收到该Broker的心跳消息的时间</p>
+<p><code>filterServerTable</code>用于记录类模式消息过滤</p>
+<p>RocketMQ基于<strong>订阅-发布</strong>机制 一个Topic拥有多个消息队列 一个Broker为每一主题默认创建4个读队列 4个写队列(这是很老的版本 稍微新一点的似乎是8个读队列 8个写队列) 多个Broker组成一个集群 BrokerName由相同的多台Broker组成Master-Slave架构 brokerId为0 代表Master 大于0 代表Slave</p>
+<h3 id="路由注册"><a href="#路由注册" class="headerlink" title="路由注册"></a>路由注册</h3><p>RocketMQ路由注册是通过Broker与NS的心跳功能实现的 Broker启动时向集群中的所有的NameServer发送心跳语句 之后以30s/个的频率向所有的NS发送心跳包 NS收到心跳包后更新<code>BrokerLiveInfo</code>的<code>lastUpdateTimestamp</code>的字段 并且NS每隔10s扫描<code>brokerAddrTable</code> 如果发现超过120s没有收到心跳包的broker 就移除其路由信息并关闭Socket连接(<strong>这里就引出了另一个问题: Ns要等Broker失效120s才会将其从路由表剔除 如果在Broker故障期间 Consumer依然根据原来的路由信息 向已宕机的Broker发送消息 那么必然会失败 如何处理</strong>)</p>
+<p>NS处理心跳包的代码实现在<code>RouteInfoManager::registerBroker</code>方法中 其定期扫描<code>brokerLiveTable</code>的方法在<code>RouteInfoManager::scanNotActiveBroker</code> 由<code>NamesrvController::initialize</code>调用</p>
+<pre><code class="java">this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                NamesrvController.this.routeInfoManager.scanNotActiveBroker();
+            }
+}, 5, 10, TimeUnit.SECONDS);</code></pre>
+<h3 id="路由发现"><a href="#路由发现" class="headerlink" title="路由发现"></a>路由发现</h3><p>RocketMQ的路由发现是<strong>非实时</strong>的 当Topic路由出现变化后NameServer不主动推送给客户端 而是由客户端定时拉取最新路由 拉取路由信息的命令为<code>GET_ROUTEINTO_BY_TOPIC</code>其定义在<code>RequestCode</code>中</p>
+<p>由<code>DefaultRequestProcessor</code>处理收到的来自客户端的拉取路由的消息 其对消息进行基本的解码 然后调用<code>NamesrvController</code>控制类获得<code>RouteInfoManager</code> 最后调用 <code>RouteInfoManager::pickupTopicRouteData</code>方法对<code>RouteInfoManager</code>中所存储的Topic相关的Broker集群以及具体的Broker进行检索并返回相关数据 这个读取Topic相关Broker信息的过程也用读写锁进行了控制 如果查不到Topic的相关信息则返回<code>TOPIC_NOT_EXISTS</code>状态码</p>
+<h2 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a>Broker</h2><p>to_be_continued</p>
+<h2 id="消息发送"><a href="#消息发送" class="headerlink" title="消息发送"></a>消息发送</h2><p>首先需要考虑几个问题:</p>
+<ol>
+<li>消息队列如何进行负载</li>
+<li>消息发送如何实现高可用</li>
+<li>批量消息发送如何实现一致性</li>
+</ol>
+<p>RocketMQ支持3种消息发送方式:</p>
+<ol>
+<li>同步</li>
+<li>异步</li>
+<li>单向</li>
+</ol>
+<p><code>Message</code>的全属性构造函数</p>
+<p>关于默认的消息存储的一些设置可以在<code>MessageStoreConfig</code>中看到</p>
+<pre><code class="java">public Message(String topic, String tags, String keys, int flag, byte[] body, boolean waitStoreMsgOK)</code></pre>
+<ul>
+<li><p>keys</p>
+<p>  Message 索引键 多个用空格隔开 用以根据key快速检索到消息</p>
+</li>
+<li><p>waitStoreMsgOK</p>
+<p>  消息发送时是否等消息存储完成后再返回</p>
+</li>
+</ul>
+<h3 id="DefaultMQProducer-启动流程"><a href="#DefaultMQProducer-启动流程" class="headerlink" title="DefaultMQProducer 启动流程"></a>DefaultMQProducer 启动流程</h3><p>当我们通过<code>DefaultMQProducer</code>启动一个<code>DefaultMQProducer</code>时 最终会调用<code>DefaultMQProducerImpl</code>的<code>public void start(final boolean startFactory)</code>方法</p>
+<p>该方法首先会检查<code>producerGroup</code>是否符合要求 并改变生产者的<code>instanceName</code>为进程id</p>
+<pre><code class="java">this.checkConfig();// 检查`producerGroup`是否符合要求
+if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
+                    this.defaultMQProducer.changeInstanceNameToPID();
+}</code></pre>
+<p>获得<code>pid</code>的方法使用了<code>JMX</code> 下面所示的这个方法实现在common包中的<code>UtilAll</code>中</p>
+<pre><code class="java">public static int getPid() {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+        String name = runtime.getName(); // format: &quot;pid@hostname&quot;
+        try {
+            return Integer.parseInt(name.substring(0, name.indexOf(&#39;@&#39;)));
+        } catch (Exception e) {
+            return -1;
+        }
+}</code></pre>
+<p>然后会创建库客户端实例</p>
+<pre><code class="java">this.mQClientFactory = MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer, rpcHook);</code></pre>
+<p>整个JVM实例中只会存在一个<code>MQClientManager</code>和一个<code>MQClientInstance</code>实例</p>
+<pre><code class="java">private static MQClientManager instance = new MQClientManager();</code></pre>
+<p>该实例负责维护MQClientInstance缓存表</p>
+<pre><code class="java">private ConcurrentMap&lt;String/* clientId */, MQClientInstance&gt; factoryTable = new ConcurrentHashMap&lt;String, MQClientInstance&gt;();</code></pre>
+<p>同一个clientid只创建一个instance clientid=客户端ip+instance+unitName 通过刚才所说的将instance设为默认的client rocketmq会将其instance设置为pid 从而避免在一台物理机上部署多个应用程序时 带来混乱</p>
+<p>之后向clientinstance注册当前的生产者 将当前生产者加入到<code>MQClientInstance</code>中从而方便后续网络请求 心跳检测等 这个<code>MQClientInstance</code>是真正负责和NS等打交道的类 其记录了consunmer集群 producer集群 以及topic的路由信息等等 而<code>DefaultMQProducerImpl</code>最主要的功能则是消息的发送 至于<code>DefaultMQProducer</code>则主要是一些producer的基本配置</p>
+<pre><code class="java">boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);
+    if (!registerOK) {
+            this.serviceState = ServiceState.CREATE_JUST;
+            throw new MQClientException(&quot;The producer group[&quot; + this.defaultMQProducer.getProducerGroup()
+             + &quot;] has been created before, specify another name please.&quot; + FAQUrl.suggestTodo(FAQUrl.GROUP_NAME_DUPLICATE_URL),
+             null);
+}</code></pre>
+<p>注册逻辑:</p>
+<pre><code class="java">public boolean registerProducer(final String group, final DefaultMQProducerImpl producer) {
+        if (null == group || null == producer) {
+            return false;
+        }
+
+        MQProducerInner prev = this.producerTable.putIfAbsent(group, producer);
+        if (prev != null) {
+            log.warn(&quot;the producer group[{}] exist already.&quot;, group);
+            return false;
+        }
+
+        return true;
+}</code></pre>
+<p>所以它这个代码逻辑应该是我们可以在一个JVM进程中启动多个属于不同group的producer 但是不能启动多个相同group的producer 否则就会喜提<code>MQClientException</code>异常 告知我们已经创建了该group</p>
+<p>最后启动MQClientInstance</p>
+<pre><code class="java">if (startFactory) {
+                    mQClientFactory.start();
+}</code></pre>
+<p>从ns获得路由信息后 将会循环遍历路由信息的QueueData字段 如果队列没有写权限 则继续遍历下一个QueueData 对于可写的队列 再根据其BrokerName找到BrokerData信息 找不到或者没有找到Master节点 则遍历下一个queuedata 根据写队列的个数 按照topic+序号创建MessageQueue 填充<code>topicPublishInfo</code>的<code>List&lt;QueueMessage&gt;</code> 完成消息发送的路由查找 最终完成路由查找 这一段的逻辑实现在<code>MQClientInstance::topicRouteData2TopicPublishInfo</code>中</p>
+<pre><code class="java">List&lt;QueueData&gt; qds = route.getQueueDatas();
+            Collections.sort(qds);// 根据brokerName字段进行排序
+            for (QueueData qd : qds) {
+                if (PermName.isWriteable(qd.getPerm())) {
+                    BrokerData brokerData = null;
+                    for (BrokerData bd : route.getBrokerDatas()) {
+                        if (bd.getBrokerName().equals(qd.getBrokerName())) {
+                            brokerData = bd;
+                            break;
+                        }
+                    }
+
+                    if (null == brokerData) {
+                        continue;
+                    }
+
+                    if (!brokerData.getBrokerAddrs().containsKey(MixAll.MASTER_ID)) {
+                        continue;
+                    }
+
+                    for (int i = 0; i &lt; qd.getWriteQueueNums(); i++) {
+                        MessageQueue mq = new MessageQueue(topic, qd.getBrokerName(), i);
+                        info.getMessageQueueList().add(mq);
+                    }
+                }
+            }
+</code></pre>
+<h3 id="消息发送的基本流程"><a href="#消息发送的基本流程" class="headerlink" title="消息发送的基本流程"></a>消息发送的基本流程</h3><p>主要流程: 验证消息 -&gt; 查找路由 -&gt; 选择消息队列 -&gt; 消息发送 以<code>DefaultMQClientImpl::sendDefaultImpl</code>下手</p>
+<h4 id="消息验证"><a href="#消息验证" class="headerlink" title="消息验证"></a>消息验证</h4><p>该方法一开始即对消息进行了验证</p>
+<pre><code class="java">Validators.checkMessage(msg, this.defaultMQProducer)</code></pre>
+<p><code>checkMessage</code>方法对消息所携带的TOPIC的合法性进行验证 然后检查消息是否为空 长度是否为0 是否超过了该producer允许的最大长度(默认4M)</p>
+<h4 id="查找路由信息"><a href="#查找路由信息" class="headerlink" title="查找路由信息"></a>查找路由信息</h4><p><code>DefaultMQClientImpl::tryToFindTopicPublishInfo</code> 该方法首先会查找<code>topicPublishInfoTable</code>这个map中的缓存 如果没有当前消息的topic信息(TopicPublishInfo) 则将当前topic置入该map 然后调用<code>MQClientInstance::updateTopicRouteInfoFromNameServer</code>方法 尝试从ns获得topic的路由信息 在这期间 MQClientInstance 会使用<strong>ReentrantLock对从ns获取topic的路由信息以及对<code>topicRouteInfo</code>的字段的更新等操作进行加锁</strong> 同时整个方法是<strong>同步进行的</strong> MQClientInstance调用<code>MQClientAPIImpl::getTopicRouteInfoFromNameServer</code>方法 而该方法进一步调用<code>NettyRemotingClient::invokeSync</code>进行同步调用 当从ns也没有找到时路由信息时 尝试使用默认主题去查询 如果 brokercofig的autoCreateTopicEnable被设置为true 则ns将返回路由信息 否则将抛出无法找到topic异常</p>
+<p><code>TopicPublishInfo</code>属性:</p>
+<pre><code class="java">//是否是顺序消息
+private boolean orderTopic = false;
+private boolean haveTopicRouterInfo = false;
+//该主题队列的消息队列
+private List&lt;MessageQueue&gt; messageQueueList = new ArrayList&lt;MessageQueue&gt;();
+//每选择一次消息队列 该值会增加1 如果到达Integer.MAX_VALUE 则重置为0
+private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
+private TopicRouteData topicRouteData;</code></pre>
+<p><code>TopicRouteData</code>属性</p>
+<pre><code class="java">    private String orderTopicConf;
+    // 队列元数据
+    private List&lt;QueueData&gt; queueDatas;
+    // tpoic分布的broker元数据
+    private List&lt;BrokerData&gt; brokerDatas;
+    private HashMap&lt;String/* brokerAddr */, List&lt;String&gt;/* Filter Server */&gt; filterServerTable;</code></pre>
+<p><code>DefaultMQClientImpl::tryToFindTopicPublishInfo</code>:</p>
+<pre><code class="java">    private TopicPublishInfo tryToFindTopicPublishInfo(final String topic) {
+        TopicPublishInfo topicPublishInfo = this.topicPublishInfoTable.get(topic);
+        if (null == topicPublishInfo || !topicPublishInfo.ok()) {
+            this.topicPublishInfoTable.putIfAbsent(topic, new TopicPublishInfo());
+            this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic);
+            topicPublishInfo = this.topicPublishInfoTable.get(topic);
+        }
+
+        if (topicPublishInfo.isHaveTopicRouterInfo() || topicPublishInfo.ok()) {
+            return topicPublishInfo;
+        } else {
+            // 当从ns也没有找到时路由信息时 尝试使用默认主题曲查询 如果 brokercofig的autoCreateTopicEnable被设置为true 则ns将返回路由信息 否则将抛出无法找到topic异常
+            this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic, true, this.defaultMQProducer);
+            topicPublishInfo = this.topicPublishInfoTable.get(topic);
+            return topicPublishInfo;
+        }
+    }</code></pre>
+<ul>
+<li>关于这个默认主题 与 <code>AUTO_CREATE_TOPIC_KEY_TOPIC</code></li>
+</ul>
+<p>涉及到为什么不推荐在生产环境下开启<code>autoCreateTopicEnable</code>选项</p>
+<p><img src="/img/create_topic_sequence.jpg" srcset="/img/loading.gif" alt="cts"></p>
+<p>经过上面自动创建路由机制的创建流程，我们可以比较容易的分析得出如下结论:</p>
+<p>因为开启了自动创建路由信息，消息发送者根据Topic去NameServer无法得到路由信息，但接下来根据默认Topic从NameServer是能拿到路由信息(在每个Broker中，存在8个队列)，因为两个Broker在启动时都会向NameServer汇报路由信息。此时消息发送者缓存的路由信息是2个Broker，每个Broker默认4个队列（原因见3.2.1:Step2的分析）。消息发送者然后按照轮询机制，发送第一条消息选择(broker-a的messageQueue:0)，向Broker发送消息，Broker服务器在处理消息时，首先会查看自己的路由配置管理器(TopicConfigManager)中的路由信息，此时不存在对应的路由信息，然后尝试查询是否存在默认Topic的路由信息，如果存在，说明启用了autoCreateTopicEnable，则在TopicConfigManager中创建新Topic的路由信息，此时存在与Broker服务端的内存中，然后本次消息发送结束。此时，在NameServer中还不存在新创建的Topic的路由信息</p>
+<p>这里有三个关键点:</p>
+<ol>
+<li>启用autoCreateTopicEnable创建主题时，在Broker端创建主题的时机为，消息生产者往Broker端发送消息时才会创建</li>
+<li>然后Broker端会在一个心跳包周期内，将新创建的路由信息发送到NameServer，于此同时，Broker端还会有一个定时任务，定时将内存中的路由信息，持久化到Broker端的磁盘上</li>
+<li>消息发送者会每隔30s向NameServer更新路由信息，如果消息发送端一段时间内未发送消息，就不会有消息发送集群内的第二台Broker，那么NameServer中新创建的Topic的路由信息只会包含Broker-a，然后消息发送者会向NameServer拉取最新的路由信息，此时就会消息发送者原本缓存了2个broker的路由信息，将会变为一个Broker的路由信息，则该Topic的消息永远不会发送到另外一个Broker，就出现了上述现象</li>
+</ol>
+<p>原因就分析到这里了，现在我们还可以的大胆假设，开启autoCreateTopicEnable机制，什么情况会在两个Broker上都创建队列，其实，我们只需要连续快速的发送9条消息，就有可能在2个Broker上都创建队列</p>
+<h4 id="选择消息队列"><a href="#选择消息队列" class="headerlink" title="选择消息队列"></a>选择消息队列</h4><p>消息选择的逻辑在<code>TopicPublishInfo::selectOneMessageQueue</code>中 其<code>lastBrokerName</code>就是上一次选择的执行发送消息失败的broker 第一次调用给方法时<code>lastBrokerName</code>为<code>null</code> 此时直接用<code>sendWhichQueue</code>自增取值 再与队列个数取模 返回该位置MQ 如果消息发送再失败的话下次进行消息队列选择时 规避上次MQ所在的Broker 否则很可能再次会失败</p>
+<pre><code class="java">    public MessageQueue selectOneMessageQueue(final String lastBrokerName) {
+        if (lastBrokerName == null) {
+            return selectOneMessageQueue();
+        } else {
+            int index = this.sendWhichQueue.getAndIncrement();
+            for (int i = 0; i &lt; this.messageQueueList.size(); i++) {
+                int pos = Math.abs(index++) % this.messageQueueList.size();
+                if (pos &lt; 0)
+                    pos = 0;
+                MessageQueue mq = this.messageQueueList.get(pos);
+                if (!mq.getBrokerName().equals(lastBrokerName)) {
+                    return mq;
+                }
+            }
+            return selectOneMessageQueue();
+        }
+    }
+
+    public MessageQueue selectOneMessageQueue() {
+        int index = this.sendWhichQueue.getAndIncrement();
+        int pos = Math.abs(index) % this.messageQueueList.size();
+        if (pos &lt; 0)
+            pos = 0;
+        return this.messageQueueList.get(pos);
+    }</code></pre>
+<ul>
+<li>broker故障延迟机制</li>
+</ul>
+<p>主要代码实现在<code>MQFaultStrategy::selectOneMessageQueue</code>中</p>
+<p>该方法处理流程</p>
+<ol>
+<li>对于消息队列的列表进行轮询获取一个消息队列</li>
+<li>验证该消息队列是否可用 通过<code>LatencyFaultTolerance::isAvailable(String brokerName)</code>判断是否可用 该方法通过判断参数是否在实现类中的faultItem列表中 返回判断结果</li>
+<li>通过<code>LatencyFaultTolerance::pickOneAtLeast()</code>中选择一个mq 判断其是否可用 若可用则从<code>LatencyFaultTolerance</code>中剔除该Topic条目 表明Broker故障已经恢复</li>
+</ol>
+<p>在<code>DefaultMQProducerImpl::sendDefaultImpl</code>这个消息方法中 如果发送过程抛出异常 将调用<code>DefaultMQProducer::updateFaultItem</code>方法 该方法直接调用<code>MQFaultStrategy::updateFaultItem(brokerName, currentLatency, isolation)</code>方法 该方法的第2个参数传入本次消息发送延迟时间 但3个参数设置是否隔离 如果是 则使用默认时长30s来计算BNroker故障规避时长 如果为false 则使用本次消息发送延迟时间来计算Broker故障规避时长</p>
+<pre><code class="java">
+private long[] latencyMax = {50L, 100L, 550L, 1000L, 2000L, 3000L, 15000L};
+private long[] notAvailableDuration = {0L, 0L, 30000L, 60000L, 120000L, 180000L, 600000L};
+
+public void updateFaultItem(final String brokerName, final long currentLatency, boolean isolation) {
+        if (this.sendLatencyFaultEnable) {
+            long duration = computeNotAvailableDuration(isolation ? 30000 : currentLatency);
+            this.latencyFaultTolerance.updateFaultItem(brokerName, currentLatency, duration);
+        }
+    }
+
+    private long computeNotAvailableDuration(final long currentLatency) {
+        for (int i = latencyMax.length - 1; i &gt;= 0; i--) {
+            if (currentLatency &gt;= latencyMax[i])
+                return this.notAvailableDuration[i];
+        }
+
+        return 0;
+    }</code></pre>
+<p>如上面的代码所示<code>computeNotAvailableDuration</code>方法用来计算接下来多久的时间里Broker不会参与消息发送队列负载 具体算法: 从LatencyMax数组尾部开始寻找 找到第一个比currentLatency小的下标 然后从notAvailableDuration数组中获取需要规避的时长 计算完毕后调用<code>LatencyFaultTolerance::updateFaultItem</code>对faultItem进行更新</p>
+<h4 id="进行发送"><a href="#进行发送" class="headerlink" title="进行发送"></a>进行发送</h4><p>消息发送的逻辑实现在<code>DefaultMQClientImpl::sendKernelImpl</code>中 其做了如下工作</p>
+<ol>
+<li><p>根据MQ获取broker的网络地址 如果 <code>MQClientInstance</code> 的<code>brokerAddressTable</code>未缓存该Broker信息 则从NS主动更新以下topic的路由信息 如果路由更新后 还是找不到则抛出<code>MQClientException</code></p>
+</li>
+<li><p>为消息分配全局唯一ID 如果消息体超过4K(这个值定义<code>DefaultMQProducer中</code>的<code>private int compressMsgBodyOverHowmuch = 1024 * 4;</code>) 则会其进行zip压缩 并设置标志位 如果是事务Prepared消息 则设置标志位</p>
+<p> zip压缩代码 实现在<code>UtilAll</code></p>
+<pre><code class="java">
+ public static byte[] compress(final byte[] src, final int level) throws IOException {
+     byte[] result = src;
+     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(src.length);
+     java.util.zip.Deflater defeater = new java.util.zip.Deflater(level);
+     DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(byteArrayOutputStream, defeater);
+     try {
+         deflaterOutputStream.write(src);
+         deflaterOutputStream.finish();
+         deflaterOutputStream.close();
+         result = byteArrayOutputStream.toByteArray();
+     } catch (IOException e) {
+         defeater.end();
+         throw e;
+     } finally {
+         try {
+             byteArrayOutputStream.close();
+         } catch (IOException ignored) {
+         }
+
+         defeater.end();
+     }
+
+     return result;
+ }</code></pre>
+</li>
+<li><p>如果注册了消息发送钩子函数 则执行消息发送之前的增强逻辑 可通过<code>DefaultMQProducer::registerSendMessageHook</code> 进行注册</p>
+</li>
+<li><p>构建消息发送请求包 该包包括以下重要信息: 生产者组 主题名称 默认创建主题key 该主题在单个Broker默认的队列数 队列id 消息系统标记 消息发送时间 消息标记 消息扩展属性 消息充实次数 是否是批量消息等</p>
+</li>
+<li><p>根据消息发送方式 同步 异步或者单向进行网络传输</p>
+</li>
+<li><p>如果注册了消息发送钩子函数 执行after逻辑</p>
+</li>
+</ol>
+<ul>
+<li>批量消息发送</li>
+</ul>
+<p>略</p>
+<h2 id="ROCKETMQ-消息存储"><a href="#ROCKETMQ-消息存储" class="headerlink" title="ROCKETMQ 消息存储"></a>ROCKETMQ 消息存储</h2><p>RocketMQ主要存储的文件包括CommitLog ConsumeQueue indexFile文件 RocketMq将所有主题的消息存储在同一个文件中 确保消息发送时顺序写文件 尽最大能力确保消息发送的高性能与高吞吐量</p>
+<p><img src="/img/rocketmq_msg_storage_design.jpg" srcset="/img/loading.gif" alt="rsd"></p>
+<p>存储流程比较复杂 在<code>CommitLog::putMessage</code>,<code>MappedFile::appendMessagesInner</code> 以及<code>CommitLog$DefaultAppendMessageCallback::doAppend</code>方法中我们可以了解其最基本流程</p>
+<ol>
+<li><p>如果当前Broker停止工作或为SLAVE角色或当前ROCKETMQ不支持写入或消息主题超过256个字符 或消息属性超过65536个字符 则拒绝写入</p>
+</li>
+<li><p>如果消息的延迟级别大于0 将消息的原主题名称与原消息队列id存入消息属性中 用延迟消息主题<code>SCHEDULE_TOPIC</code>,消息队列ID更新原先消息的主题与队列 这是并发消息消费重试关键的一步(?这块还不太懂)</p>
+</li>
+<li><p>commitlog默认存储目录<code>${home}/store/commitlog</code> 每一个文件默认1G 一个文件写满后 再创建另一个 以该文件中第一个偏移量为文件名 可以将<code>MappedFileQueue</code>看作<code>${Rocket_mq}/store/commitlog</code>文件夹 <code>MappedFile</code> 则对应该文件夹下的一个个文件</p>
+</li>
+<li><p>在写入<code>CommitLog</code>之前 先申请putMessageLock 即对commitlog文件的写是<strong>串行的</strong>(这里捎带提一句无关的 它还有个spin lock的实现比较有意思)</p>
+<pre><code class="java"> /**
+    * Spin lock Implementation to put message, suggest using this with low race conditions
+ */
+ public class PutMessageSpinLock implements PutMessageLock {
+ //true: Can lock, false : in lock.
+ private AtomicBoolean putMessageSpinLock = new AtomicBoolean(true);
+
+     @Override
+     public void lock() {
+         boolean flag;
+         do {
+             flag = this.putMessageSpinLock.compareAndSet(true, false);
+         }
+         while (!flag);
+     }
+
+     @Override
+     public void unlock() {
+         this.putMessageSpinLock.compareAndSet(false, true);
+         }
+ }</code></pre>
+</li>
+<li><p>设置消息的存储时间 如果mappedFile为空 表示尚未创建任何文件 则用偏移量0创建第一个commit文件 如果创建失败则<code>CREATE_MAPEDFILE_FAILED</code> 这很有可能是权限或磁盘空间不足导致的</p>
+</li>
+<li><p>将消息追加的MappedFile中 首先获取MappedFile当前写指针 MappedFile的<code>protected final AtomicInteger wrotePosition = new AtomicInteger(0);</code>字段记录了具体写到的位置 如果这个指针的值已经大于等文件大小 则说明文件已写满 抛出<code>AppendMessageStatus.UNKNOWN_ERROR</code> 否则通过<code>ByteBuf::slive()</code>方法创建一个与MappedFile的共享内存区 并设置position为当前写指针 这个和过程我们在<code>MappedFile::appendMessagesInner</code>方法中可以看到</p>
+</li>
+<li><p>创建全局唯一消息id 消息id有16字节 为保证其可读性 返回给应用程序的msgid为字符类型 可以通过<code>UtilAll::bytes2string</code> <code>UtilAll::string2Bytes</code>进行转化 消息id组成: <strong>|四字节ip|四字节端口|8字节消息偏移量</strong>(不是很清楚为什么端口号会占4字节 可能是为了对齐?) 创建id的实现方法在<code>MessageDecoder::createMessageId</code>中 由<code>CommitLog$DefaultAppendMessageCallback::doAppend</code>调用</p>
+</li>
+<li><p>获取该消息在消息队列的偏移量 commitlog保存了当前所有消息队列的当前待写入偏移量</p>
+</li>
+<li><p>根据消息体的长度 主题的长度 属性的长度结合消息存储格式计算消息总长度</p>
+</li>
+<li><p><code>if ((msgLen + END_FILE_MIN_BLANK_LENGTH) &gt; maxBlank)</code>将返回带有<code>AppendMessageStatus.END_OF_FILE</code>状态码的<code>AppendMessageResult</code> 随后Broker将新建一个CommitLog来存储该信息</p>
+<pre><code class="java">if ((msgLen + END_FILE_MIN_BLANK_LENGTH) &gt; maxBlank) {
+            this.resetByteBuffer(this.msgStoreItemMemory, maxBlank);
+            // 1 TOTALSIZE
+            this.msgStoreItemMemory.putInt(maxBlank);
+            // 2 MAGICCODE
+            this.msgStoreItemMemory.putInt(CommitLog.BLANK_MAGIC_CODE);
+            // 3 The remaining space may be any value
+            // Here the length of the specially set maxBlank
+            final long beginTimeMills = CommitLog.this.defaultMessageStore.now();
+            byteBuffer.put(this.msgStoreItemMemory.array(), 0, maxBlank);
+            return new AppendMessageResult(AppendMessageStatus.END_OF_FILE, wroteOffset, maxBlank, msgId, msgInner.getStoreTimestamp(),
+                queueOffset, CommitLog.this.defaultMessageStore.now() - beginTimeMills);
+        }</code></pre>
+<p>从这一部分的逻辑我们可以看出每个commitlog开头最少会空闲8字节 高4字节存储当前文件剩余空间 低4字节存储commitlog文件魔数</p>
+</li>
+<li><p>将消息内容存储到bytebuffer中 然后创建<code>AppendMessageResult</code> 注意<strong>这里只是将消息存储在MappedFile对应的内存映射Buffer中 并没有刷写到磁盘</strong></p>
+</li>
+<li><p>更新Topic对应的消息队列逻辑偏移量</p>
+</li>
+<li><p>处理完消息追加逻辑后释放<code>putMessageLock</code>锁</p>
+</li>
+<li><p>根据刷盘策略进行刷盘</p>
+</li>
+</ol>
+<h3 id="存储文件组织与内存映射"><a href="#存储文件组织与内存映射" class="headerlink" title="存储文件组织与内存映射"></a>存储文件组织与内存映射</h3><p>RocketMQ通过使用<strong>内存映射文件</strong>(mmap)来提高IO性能 无论是CommitLog  ConsumeQueue还是indexFile 单个文件都被设计为固定长度 如果一个文件写满以后再创建一个新文件 文件名就为该文件第一条消息对应的全局物理偏移量</p>
+<p>RocketMQ使用<code>MappedFile</code> <code>MappedFileQueue</code>来封装存储文件 后者是前者的管理容器 是对存储目录的封装</p>
+<p><code>MappedFileQueue</code>主要属性:</p>
+<pre><code class="java">    private final String storePath;
+
+    private final int mappedFileSize;
+
+    private final CopyOnWriteArrayList&lt;MappedFile&gt; mappedFiles = new CopyOnWriteArrayList&lt;MappedFile&gt;();
+
+    private final AllocateMappedFileService allocateMappedFileService;
+
+    private long flushedWhere = 0;
+    private long committedWhere = 0;
+
+    private volatile long storeTimestamp = 0;</code></pre>
+<p><code>flushWhere</code>属性:当前刷盘指针 表示该指针以前的所有数据全部持久化到磁盘</p>
+<p><code>committedWhere</code>属性:当前数据提交指针  内存中的ByteBuffer当前的写指针 该值大于等于flushedWhere</p>
+<p>根据消息偏移量 计算mappedFile在<code>MappedFileQueue.mappedFiles</code>中的索引位置的计算公式:<code>int index = (int) ((offset / this.mappedFileSize) - (firstMappedFile.getFileFromOffset() / this.mappedFileSize));</code> <code>offset / this.mappedFileSize</code>计算出按照offset在没有删除的情况本该是第几个  <code>(firstMappedFile.getFileFromOffset() / this.mappedFileSize)</code>计算实际上的列表中第一个mappedFile在没有删除的情况下是第几个</p>
+<p>之所以这样计算是因为 为了提高效率 RocketMQ采用了内存映射 只要存在于存储目录下的文件都需要创建对内存映射文件 如果不定时将已消费的消息 从存储文件中删除 会对造成极大的内存压力与资源浪费 所以RocketMQ采取定时删除存储文件的策略 也就是说在存储文件中 第一个文件不一定以0偏移 开头 <strong>因为该文件可能在某一时刻被删除</strong></p>
+<h4 id="MappedFile"><a href="#MappedFile" class="headerlink" title="MappedFile"></a>MappedFile</h4><ul>
+<li><p>MappedFile 初始化 init</p>
+<p>  根据<code>transientStorePoolEnable</code>存在两种初始化情况 <code>transientStorePoolEnable</code>为true表示内容先存储在堆外内存 然后通过Commit线程将数据提交到内存映射MappedByteBuffer中 再通过flush线程将内存映射Buffer中的数据持久化到磁盘</p>
+<p>  <code>MappedFile</code> 在init方法中 创建内存文件映射的代码</p>
+<pre><code class="java">  ...
+      //确保文件目录已经被创建
+      ensureDirOK(this.file.getParent());
+
+      try {
+          this.fileChannel = new RandomAccessFile(this.file, &quot;rw&quot;).getChannel();
+          this.mappedByteBuffer = this.fileChannel.map(MapMode.READ_WRITE, 0, fileSize);
+          TOTAL_MAPPED_VIRTUAL_MEMORY.addAndGet(fileSize);
+          TOTAL_MAPPED_FILES.incrementAndGet();
+          ok = true;
+      }</code></pre>
+</li>
+<li><p>MappedFile 提交 Commit</p>
+<p>  内存映射文件的提交动作由<code>MappedFile::commit</code>实现</p>
+<pre><code class="java">  public int commit(final int commitLeastPages) {
+      if (writeBuffer == null) {
+          //no need to commit data to file channel, so just regard wrotePosition as committedPosition.
+          return this.wrotePosition.get();
+      }
+      if (this.isAbleToCommit(commitLeastPages)) {
+          if (this.hold()) {
+              commit0(commitLeastPages);
+              this.release();
+          } else {
+              log.warn(&quot;in commit, hold failed, commit offset = &quot; + this.committedPosition.get());
+          }
+      }
+
+      // All dirty data has been committed to FileChannel.
+      if (writeBuffer != null &amp;&amp; this.transientStorePool != null &amp;&amp; this.fileSize == this.committedPosition.get()) {
+          this.transientStorePool.returnBuffer(writeBuffer);
+          this.writeBuffer = null;
+      }
+
+      return this.committedPosition.get();
+  }</code></pre>
+<p>  <code>commitLeastPages</code>为本次最少要提交的页数 如果要提交的数据不够 则待下次提交 如果<code>writeBuffer</code>为空 则直接返回<code>wrotePosition</code>指针(表明了提交的主体是<code>writeBuffer</code>)</p>
+<p>  具体的提交实现</p>
+<pre><code class="java">  protected void commit0(final int commitLeastPages) {
+      int writePos = this.wrotePosition.get();
+      int lastCommittedPosition = this.committedPosition.get();
+
+      if (writePos - this.committedPosition.get() &gt; 0) {
+          try {
+              //创建ByteBuffer共享缓冲区
+              ByteBuffer byteBuffer = writeBuffer.slice();
+              //将新创建的byteBuffer回退到上一次提交的位置
+              byteBuffer.position(lastCommittedPosition);
+              //设置limit为wrotePosition(即当前最大有效数据指针)
+              byteBuffer.limit(writePos);
+              this.fileChannel.position(lastCommittedPosition);
+              //把committedPostion到wrotePosition的数据复制到FileChannel中
+              this.fileChannel.write(byteBuffer);
+              //更新commitedPosition指针为wrotePosition
+              this.committedPosition.set(writePos);
+          } catch (Throwable e) {
+              log.error(&quot;Error occurred when commit data to FileChannel.&quot;, e);
+          }
+      }
+  }</code></pre>
+<p>  首先创建ByteBuffer共享缓冲区 然后将新创建的byteBuffer回退到上一次提交的位置 设置limit为wrotePosition(即当前最大有效数据指针) 然后把committedPostion到wrotePosition的数据复制到FileChannel中 然后更新commitedPosition指针为wrotePosition <strong>commit的作用就是将<code>MappedFile.writeBuffer</code>中的数据提交到文件通道FileChannel中</strong></p>
+<p>  ByteBuffer的使用技巧: slice()方法创建一个共享缓冲区 与原先的ByteBuffer共享内存但维护一套独立的指针(position mark limit)</p>
+</li>
+<li><p>MappedFile 刷盘 (flush)</p>
+</li>
+</ul>
+<p>其基本逻辑实现在<code>MappedFile::flush</code>方法实现 其基本逻辑同``MappedFile::commit`相似</p>
+<pre><code class="java">    /**
+     * @return The current flushed position
+     */
+    public int flush(final int flushLeastPages) {
+        if (this.isAbleToFlush(flushLeastPages)) {
+            if (this.hold()) {
+                int value = getReadPosition();
+
+                try {
+                    //We only append data to fileChannel or mappedByteBuffer, never both.
+                    if (writeBuffer != null || this.fileChannel.position() != 0) {
+                        this.fileChannel.force(false);
+                    } else {
+                        this.mappedByteBuffer.force();
+                    }
+                } catch (Throwable e) {
+                    log.error(&quot;Error occurred when force data to disk.&quot;, e);
+                }
+
+                this.flushedPosition.set(value);
+                this.release();
+            } else {
+                log.warn(&quot;in flush, hold failed, flush offset = &quot; + this.flushedPosition.get());
+                this.flushedPosition.set(getReadPosition());
+            }
+        }
+        return this.getFlushedPosition();
+    }</code></pre>
+<p>通过调用<code>FileChannel</code>或者<code>mappedByteBuffer</code>的<code>force</code>方法 执行刷盘操作</p>
+<p>获取最大的读指针:</p>
+<pre><code class="java"> /**
+     * @return The max position which have valid data
+     */
+    public int getReadPosition() {
+        return this.writeBuffer == null ? this.wrotePosition.get() : this.committedPosition.get();
+    }</code></pre>
+<p>如果当前的writeBuffer为空则直接返回当前写指针 否则返回上一次提交的指针 在MF的设计中 只有提交了的(<strong>写入到MappedBuffer或者FileChannel的数据</strong>)才是安全的数据</p>
+<p>读取某条消息</p>
+<pre><code class="java">    public SelectMappedBufferResult getMessage(final long offset, final int size) {
+        int mappedFileSize = this.defaultMessageStore.getMessageStoreConfig().getMappedFileSizeCommitLog();
+        MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset, offset == 0);
+        if (mappedFile != null) {
+            int pos = (int) (offset % mappedFileSize);
+            return mappedFile.selectMappedBuffer(pos, size);
+        }
+        return null;
+    }
+
+    public SelectMappedBufferResult selectMappedBuffer(int pos, int size) {
+        int readPosition = getReadPosition();
+        if ((pos + size) &lt;= readPosition) {
+            if (this.hold()) {
+                ByteBuffer byteBuffer = this.mappedByteBuffer.slice();
+                byteBuffer.position(pos);
+                // 整个共享缓冲区的容量为fileSize - position 因为slice方法所创建的共享缓冲区是从其position至limit
+                ByteBuffer byteBufferNew = byteBuffer.slice();
+                byteBufferNew.limit(size);
+                return new SelectMappedBufferResult(this.fileFromOffset + pos, byteBufferNew, size, this);
+            } else {
+                log.warn(&quot;matched, but hold failed, request pos: &quot; + pos + &quot;, fileFromOffset: &quot;
+                    + this.fileFromOffset);
+            }
+        } else {
+            log.warn(&quot;selectMappedBuffer request pos invalid, request pos: &quot; + pos + &quot;, size: &quot; + size
+                + &quot;, fileFromOffset: &quot; + this.fileFromOffset);
+        }
+
+        return null;
+    }</code></pre>
+<p><code>selectMappedBuffer</code>在对pos数值进行检查后 由于在整个写入期间都没有改变<code>MappedByteBuffer</code>的指针 所以用<code>MappedByteBuffer::slice</code>返回的共享缓存区空间为整个MappedFile 然后通过设置bytebuffer的position为当前待查找的值 读取字节为当前可读字节长度 最终返回的bytebuffer的limit为<code>size</code>的值</p>
+<ul>
+<li>MappedFile 销毁 destroy</li>
+</ul>
+<p>基本逻辑在<code>MappedFile::destroy(final long intervalForcibly)</code>方法中 其参数为拒绝被销毁的最大时间</p>
+<p>销毁过程分3步</p>
+<ol>
+<li><p>关闭MappedFile 设置 初次调用时其父类<code>ReferenceResource</code>的<code>available</code>字段为false 并设置初次关闭的时间戳<code>firstShutdownTimestamp</code> 然后掉哟<code>release</code>方法尝试释放资源 只有在<code>ReferenceResource</code>所记录的引用次数字段<code>refCount</code>小于1时 才会释放 对比当前时间与<code>firstShutdownTimestamp</code> 如果已经超过了其最大拒绝存活期 每执行一次就将其引用数减少1000 知道引用数小于0 通过release方法释放资源</p>
+<pre><code class="java">     public void shutdown(final long intervalForcibly) {
+     if (this.available) {
+         this.available = false;
+         this.firstShutdownTimestamp = System.currentTimeMillis();
+         this.release();
+     } else if (this.getRefCount() &gt; 0) {
+         if ((System.currentTimeMillis() - this.firstShutdownTimestamp) &gt;= intervalForcibly) {
+             this.refCount.set(-1000 - this.getRefCount());
+             this.release();
+         }
+     }
+ }</code></pre>
+</li>
+<li><p>判断清理是否完成 判断标准是 引用次数小于等于0 且cleanupover为true 会调用<code>ByteBuffer</code>的<code>clear</code>方法对<code>MappedByteBuffer</code>进行清除</p>
+</li>
+<li><p>关闭文件通道删除物理文件 调用 <code>File</code>的<code>delete</code>方法删除文件</p>
+</li>
+</ol>
+<ul>
+<li>TransientStorePool 短暂的存储池</li>
+</ul>
+<p>RocketMQ 单独创建一个<code>DirectByteBuffer</code>内存缓冲池 用来临时存储数据 数据先写入该内存映射中 然后由commit线程定时将数据从该内存复制到与目的物理文件对应的内存映射中 引入该机制的主要原因是<strong>提供一种内存锁定 将当前堆外内存一致锁定在内存中 避免被进程将内存交换到磁盘</strong></p>
+<pre><code class="java">    public void init() {
+        for (int i = 0; i &lt; poolSize; i++) {
+            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(fileSize);
+
+            final long address = ((DirectBuffer) byteBuffer).address();
+            Pointer pointer = new Pointer(address);
+            //使用com.sun.jna.Library库对该批内存进行锁定 避免被置换到交换区
+            LibC.INSTANCE.mlock(pointer, new NativeLong(fileSize));
+
+            availableBuffers.offer(byteBuffer);
+        }
+    }</code></pre>
+<p>在消息写入时，如果writerBuffer不为空，说明开启了transientStorePoolEnable机制，则消息首先写入writerBuffer中，如果其为空，则写入mappedByteBuffer中。消息读取时，是从mappedByteBuffer中读(pageCache)。</p>
+<p>这样就有了读写分离的效果，先写入writerBuffer中，读却是从mappedByteBuffer中读取。</p>
+<p>为了对transientStorePoolEnable引入意图阐述的更加明白，这里我引入Rocketmq社区贡献者胡宗棠关于此问题的见解。</p>
+<ul>
+<li><p>通常有如下两种方式进行读写：</p>
+<p>  第一种，Mmap+PageCache的方式，读写消息都走的是pageCache，这样子读写都在pagecache里面不可避免会有锁的问题，在并发的读写操作情况下，会出现缺页中断降低，内存加锁，污染页的回写。</p>
+<p>  第二种，<code>DirectByteBuffer(堆外内存)+PageCache的</code>两层架构方式，这样子可以实现读写消息分离，<strong>写入消息时候写到的是DirectByteBuffer——堆外内存中,读消息走的是PageCache(对于,DirectByteBuffer是两步刷盘，一步是刷到PageCache，还有一步是刷到磁盘文件中)，带来的好处就是，避免了内存操作的很多容易堵的地方，降低了时延，比如说缺页中断降低，内存加锁，污染页的回写</strong>。</p>
+</li>
+</ul>
+<p>简单的说开启transientStorePool相当于</p>
+<p>启用“读写”分离，消息发送时消息先追加到DirectByteBuffer(堆外内存)中，然后在异步刷盘机制下，会将DirectByteBuffer中的内容提交到PageCache，然后刷写到磁盘。消息拉取时，直接从PageCache中拉取，实现了读写分离，减轻了PageCache的压力，能从根本上解决该问题。–<a href="https://yq.aliyun.com/articles/716568" target="_blank" rel="noopener">来自阿里云栖社区</a></p>
+<ul>
+<li>关于 <code>MappedByteBuffer</code>与<code>DirectByteBuffer</code> 引自<a href="https://stackoverflow.com/questions/1229037/difference-between-bytebuffer-allocatedirect-and-mappedbytebuffer-load" target="_blank" rel="noopener">StackOverFlow</a></li>
+</ul>
+<blockquote>
+<p>Direct ByteBuffers (those allocated using ByteBuffer.allocateDirect) are different to MappedByteBuffers in that they represent different sections of memory and are allocated differently. Direct ByteBuffers are a way to access a block of memory allocated outside of the JVM generally allocated with a malloc call (although most implementations will probably use an efficient slab allocator). I.e. it’s just a pointer to a block of memory.</p>
+</blockquote>
+<blockquote>
+<p>A MappedByteBuffer represents a section of memory allocated using mmap call, which is used to perform memory mapped I/O. Therefore MappedByteBuffers won’t register their use of memory in the same way a Direct ByteBuffer will.</p>
+</blockquote>
+<blockquote>
+<p>So while both are “direct” in that they represent memory outside of the JVM their purposes are different.</p>
+</blockquote>
+<ul>
+<li>关于内存锁定 以防止由于内存换页带来的性能暴跌</li>
+</ul>
+<p>可以参见<a href="https://www3.physnet.uni-hamburg.de/physnet/Tru64-Unix/HTML/APS33DTE/DOCU_005.HTM" target="_blank" rel="noopener">这篇文章</a></p>
+<p>除了开启<code>transientStoreEnable</code>选项之外 在创建<code>MappedFile</code>时 如果开启了<code>warmMapedFileEnable</code>选项 那么并为其分配内存时会进行所谓的内存预热</p>
+<p>以下关于内存预热的讨论来自<a href="http://tinylcy.me/2019/the-design-of-rocketmq-message-storage-system/" target="_blank" rel="noopener">这位大佬的blog</a></p>
+<p>RocketMQ 利用 mmap 将内核空间的一段内存区域映射至用户空间，映射关系一旦建立，应用程序对这段内存区域的修改可以直接反映到内核空间，反之亦然。相比如 read/write 系统调用，mmap 减少了内核空间和用户空间之间的数据拷贝，在存在大量数据传输的场景下可以有效提升 IO 效率。但是，<strong>通过 mmap 建立内存映射仅是将文件磁盘地址和虚拟地址通过映射对应起来，此时物理内存并没有填充磁盘文件内容。当实际发生文件读写时，产生缺页中断并陷入内核，然后才会将磁盘文件内容读取至物理内存</strong>。(关于这一点 本人特地去查了一下 按照维基百科的说法 In computing, mmap(2) is a POSIX-compliant Unix system call that maps files or devices into memory. It is a method of memory-mapped file I/O. It implements <strong>demand paging</strong>, because file contents are not read from disk directly and initially do not use physical RAM at all. <strong>The actual reads from disk are performed in a “lazy” manner, after a specific location is accessed</strong>. 简单的翻译一下:确实如此 而关于它所提的<strong>demand pafing</strong>:demand paging (as opposed to anticipatory paging) is a method of virtual memory management. In a system that uses demand paging, the operating system copies a disk page into physical memory only if an attempt is made to access it and that page is not already in memory)针对上述场景，RocketMQ 设计了 MappedFile 预热机制。</p>
+<p>回顾 MappedFile 的创建流程，AllocateMappedFileService 线程轮询 AllocateRequest 请求队列并创建MappedFile，此时文件系统中已经存在对应的固定大小的文件。当 RocketMQ 开启 MappedFile 内存预热（warmMapedFileEnable），且 MappedFile 文件映射空间大小<strong>大于等于</strong> mapedFileSizeCommitLog（1 GB） 时(<strong>这里我有个小小的问题 为啥MappedFile 的映射空间大小 会 出现 大于<code>mapedFileSizeCommitLog</code>的情况 因为似乎二者的设置都是根据<code>MessageStoreConfig.mappedFileSizeCommitLog</code>属性设置的</strong> 对不起 我是傻逼)，调用 warmMappedFile 方法对 MappedFile 进行预热。上述逻辑核心代码精简如下。</p>
+<pre><code class="java">
+private boolean mmapOperation() {
+    boolean isSuccess = false;
+    AllocateRequest req = null;
+    try {
+        req = this.requestQueue.take();
+        ...
+        if (req.getMappedFile() == null) {
+            MappedFile mappedFile;
+            if (messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
+                mappedFile = ServiceLoader.load(MappedFile.class).iterator().next();
+                mappedFile.init(req.getFilePath(), req.getFileSize(), 
+                                messageStore.getTransientStorePool());
+            } else {
+                mappedFile = new MappedFile(req.getFilePath(), req.getFileSize());
+            }
+            ...
+            // pre write mappedFile
+            if (mappedFile.getFileSize() &gt;= getMapedFileSizeCommitLog()
+                                        &amp;&amp; isWarmMapedFileEnable()) {
+                mappedFile.warmMappedFile(getFlushDiskType(),
+                                          getFlushLeastPagesWhenWarmMapedFile());
+            }
+            ...
+        }
+    } catch (InterruptedException e) {
+        ...
+    } catch (IOException e) {
+        ...
+    } finally {
+        ...
+    }
+    return true;
+}</code></pre>
+<p>warmMappedFile 每间隔 <code>OS_PAGE_SIZE</code> 向 mappedByteBuffer 写入一个 0，此时对应页恰好产生一个缺页中断，操作系统为对应页分配物理内存。同时，如果刷盘策略为同步刷盘，需要对每页进行刷盘。最后，通过 JNA 调用 mlock 方法锁定 mappedByteBuffer 对应的物理内存，阻止操作系统将相关的内存页调度到交换空间（swap space），以此提升后续在访问 MappedFile 时的读写性能。warmMappedFile 核心代码精简如下。</p>
+<pre><code class="java">public void warmMappedFile(FlushDiskType type, int pages) {
+    ByteBuffer byteBuffer = this.mappedByteBuffer.slice();
+    int flush = 0;
+    for (int i = 0, j = 0; i &lt; this.fileSize; i += MappedFile.OS_PAGE_SIZE, j++) {
+        byteBuffer.put(i, (byte) 0);
+        if (type == FlushDiskType.SYNC_FLUSH) {
+            if ((i / OS_PAGE_SIZE) - (flush / OS_PAGE_SIZE) &gt;= pages) {
+                flush = i;
+                mappedByteBuffer.force();
+            }
+        }
+
+        // prevent gc
+        if (j % 1000 == 0) {
+            ...
+        }
+    }
+
+    // force flush when prepare load finished
+    if (type == FlushDiskType.SYNC_FLUSH) {
+        mappedByteBuffer.force();
+    }
+
+    this.mlock();
+}</code></pre>
+<h2 id="CommitLog与ConsumeQueue与Index索引文件与CheckPoint文件"><a href="#CommitLog与ConsumeQueue与Index索引文件与CheckPoint文件" class="headerlink" title="CommitLog与ConsumeQueue与Index索引文件与CheckPoint文件"></a>CommitLog与ConsumeQueue与Index索引文件与CheckPoint文件</h2><p><img src="/img/2019-07-21-RocketMQ&#32;CommitLog.jpg" srcset="/img/loading.gif" alt="cmlg"></p>
+<p><img src="/img/2019-07-21-RocketMQ&#32;CommitLog&#32;Item.jpg" srcset="/img/loading.gif" alt=""></p>
+<p><img src="/img/commit_log_logic_view.webp" srcset="/img/loading.gif" alt="lv"></p>
+<p>可以看到commit log中 <strong>同一主题的消息是不连续的存储在文件中的</strong> 为了避免从commitlog中遍历查找订阅主题下的消息  rocketmq设计了消息消费队列文件(ConsumeQueue) 该文件可以看作CommitLog关于消息消费的索引文件 其构建机制为:当消息到达commitlog后 由专门的线程产生消息转发任务 从而构建消息消费队列文件以及索引文件</p>
+<p>consumequeue的第一级 目录为消息主题 第二级目录为主题的消息队列</p>
+<p>另一方面 为了加速消息条目的检索速度与节省磁盘空间 每一个ConsumeQueue条目不会存储消息的全量信息 其存储格式如下图所示</p>
+<p><img src="/img/consume_queue_entry.webp" srcset="/img/loading.gif" alt="cqe"></p>
+<p>单个ConsumeQueue文件默认包含30w个条目</p>
+<p>但是有个小问题–如果consumequeue的创建数量是根据broker设置的每个主题的队列数 且consumequeue的写入 是顺序写入 也就是写完一个consumequeue的文件 再写下一个 而consumer消费时 每个consumequeue只能被同时被一个consumer消费 而这一主题下的其他consumequue文件此时还没有任何数据 那分配到这些consumequeue的consumer这段时间岂不是只能闲着了?</p>
+<p>后续–</p>
+<p>自己试了一下 应该不是顺序写入 主题的consumequeue下的每个文件锁存储的应该都是该主题下的消息的不同部分 但是具体是采用什么算法的目前还不知道</p>
+<p>刚才又研究了一下 具体写入哪个ConsumeQueue似乎是由<code>DispatchRequest</code>中的<code>queueId</code>参数决定的 而这个参数其是由<code>CommitLog::checkMessageAndReturnSize</code>方法设置 而这个方法中设置该字段的值 就是通过读取ByteBuffer中的对应字段 照这么个说法的话 往哪个cconsumequeue中写入是由producer决定的？ 应该是通过设置<code>MessageQueueSelector</code>实现 其可以设置<code>SelectMessageQueueByHash</code>或者<code>SelectMessageQueueByRandom</code>或者<code>SelectMessageQueueByRandom</code>来实现 默认按照<code>MQFaultStrategy</code>的算法来选择一个消息队列进行发送 其通过<code>TopicInfo</code>维护的一个自增字段对总的ConsumeQueue数取余数得到</p>
+<ul>
+<li>Index索引文件</li>
+</ul>
+<p>ConsumeQueue是专门为消息订阅构建的索引文件 提高根据主题与消息队列检索消息的速度 而index索引文件则是通过hash索引机制为消息建立索引</p>
+<p><img src="/img/rmq_index_file.png" srcset="/img/loading.gif" alt="rmqidf"><br>虽然这两张图没啥区别把。。。。<br><img src="/img/2019-07-21-RocketMQ&#32;Index.jpg" srcset="/img/loading.gif" alt="cmlg"><br>更多内容不再展开 懒得看</p>
+<h3 id="Checkpoint文件"><a href="#Checkpoint文件" class="headerlink" title="Checkpoint文件"></a>Checkpoint文件</h3><p>该文件的作用是记录前三类文件的刷盘时间点 文件固定长度为4K 其中只是用该文件前面的24字节</p>
+<p>存储格式:</p>
+<p>| 8字节commitlog刷盘时间点| 消费队列文件刷盘时间点 | 索引文件刷盘时间点 |</p>
+<p>该文件会在broker关闭时/以及以上三类文件进行刷盘操作时 进行刷盘持久化</p>
+<h3 id="实时更新消息消费队列和索引文件"><a href="#实时更新消息消费队列和索引文件" class="headerlink" title="实时更新消息消费队列和索引文件"></a>实时更新消息消费队列和索引文件</h3><p>RocketMQ通过开启一个线程<code>ReputMessageService</code>来<strong>异步的</strong>转发<code>CommitLog</code>文件更新事件 相应的任务处理器根据转发消息及时更新<code>ConsumeQueue</code>，<code>IndexFile</code>文件 Broker服务器在启动<code>ReputMessageService</code>时 初始化其<code>reputFromOffset</code>参数</p>
+<h3 id="消息队列与索引文件恢复的一致性问题"><a href="#消息队列与索引文件恢复的一致性问题" class="headerlink" title="消息队列与索引文件恢复的一致性问题"></a>消息队列与索引文件恢复的一致性问题</h3><p>就像上面写的对于消费队列和索引文件的更新相较于对CommitLog的更新而言是异步 这就涉及到这样一个问题: 如果消息成功存储到CommitLog文件中 转发任务未成功执行 此时 消息服务器Broker由于某个原因宕机 那么将导致CommitLog ConsumeQueue IndexFile文件不一致</p>
+<p>下面说明RocketMQ中如何处理这种问题</p>
+<p>参看<code>DefaultMessageStore::load</code>方法</p>
+<pre><code class="java">    public boolean load() {
+        boolean result = true;
+
+        try {
+            // 判断上一次退出是否正常 isTempFileExist检查是否存在abort文件 如果存在 说明上一次异常退出
+            boolean lastExitOK = !this.isTempFileExist();
+            log.info(&quot;last shutdown {}&quot;, lastExitOK ? &quot;normally&quot; : &quot;abnormally&quot;);
+
+            if (null != scheduleMessageService) {
+                // 加载延迟队列 与定时消息有关
+                result = result &amp;&amp; this.scheduleMessageService.load();
+            }
+
+            // load Commit Log
+            result = result &amp;&amp; this.commitLog.load();
+
+            // load Consume Queue
+            result = result &amp;&amp; this.loadConsumeQueue();
+
+            if (result) {
+                // 加载存储检测点 检测点主要记录commitlog文件 consumequeue文件 index索引文件的刷盘点
+                this.storeCheckpoint =
+                    new StoreCheckpoint(StorePathConfigHelper.getStoreCheckpoint(this.messageStoreConfig.getStorePathRootDir()));
+                // 加载索引文件 如果上次异常退出 且索引文件的刷盘时间小于该索引文件最大的消息时间戳 则将该文件立刻销毁
+                this.indexService.load(lastExitOK);
+                // 根据是否正常退出 执行不同的恢复策略
+                this.recover(lastExitOK);
+
+                log.info(&quot;load over, and the max phy offset = {}&quot;, this.getMaxPhyOffset());
+            }
+        } catch (Exception e) {
+            log.error(&quot;load exception&quot;, e);
+            result = false;
+        }
+
+        if (!result) {
+            this.allocateMappedFileService.shutdown();
+        }
+
+        return result;
+    }</code></pre>
+<p><code>DefaultMessageStore::recover</code>的两种策略:</p>
+<ul>
+<li><p><code>DefaultMessageStore::recoverNormally</code></p>
+</li>
+<li><p><code>DefaultMessageStore::recoverAbnormally</code></p>
+<p>  从上次异常停止中 恢复时 从最后一个文件往前走 找到第一个消息存储正常的文件 另外 如果commitlog目录中没有消息文件 而在消息消费队列目录下存在文件 则需要销毁 大致流程如下:</p>
+<ol>
+<li>通过<code>isMappedFileMatchedRecover(mappedFile)</code>方法 判断mappedfile是否满足要求 首先判断文件的的魔数 若魔数符合 则判断文件第一条消息的存储时间是否为0 为0则说明该存储文件中没有存储任何消息 返回false</li>
+<li>对比文件第一条消息的时间戳与检测点 <strong>文件第一条消息的时间戳小于文件检测点 说明该文件部分消息是可靠的 则从该文件恢复</strong></li>
+<li>遍历已找到的MappedFile中的消息 检查消息的合法性 并将之重新转发到消息消费队列与索引文件(这也意味着潜在的消息重复问题)</li>
+<li>如果未找到MappedFile 则设置Commitlog的flushedWhere committedWhere指针都为0 并销毁消息消费文件</li>
+</ol>
+</li>
+</ul>
+<h3 id="刷盘策略"><a href="#刷盘策略" class="headerlink" title="刷盘策略"></a>刷盘策略</h3><p>RocketMQ的读写是基于JAVA NIO的内存映射机制<code>MappedByteBuffer</code>的 消息存储时首先将消息追加到内存 再根据配置的刷盘策略在不同时间进行刷写磁盘 如果是同步刷盘 则在消息追加到内存后 同步调用<code>MappedByteBuffer::force</code>方法 如果是异步刷盘则消息追加到内存后立刻返回给消息发送端 RocketMQ使用一个单独的线程按照某一个设定的频率执行刷盘操作(索引文件的刷盘除外)</p>
+<pre><code class="java">    public void handleDiskFlush(AppendMessageResult result, PutMessageResult putMessageResult, MessageExt messageExt) {
+        // Synchronization flush
+        // ...someCode
+        }
+        // Asynchronous flush
+        else {
+            if (!this.defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
+                flushCommitLogService.wakeup();
+            } else {
+                commitLogService.wakeup();
+            }
+        }
+    }</code></pre>
+<p>可以看到同步刷盘下<code>CommitLog::handleDiskFlush</code>方法内部同步调用相关方法 而异步刷盘则仅仅根据是否启用<code>TransientStorePool</code>来唤醒对应的服务线程</p>
+<ul>
+<li><p>同步刷盘</p>
+</li>
+<li><p>异步刷盘</p>
+<p>  在<code>transinetStorePoolEnable</code>为true的情况下</p>
+<ol>
+<li>首先将消息直接追加到堆外的DirectByteBuffer</li>
+<li><code>CommitRealTimeService</code>线程默认每200ms将ByteBuffer新追加的内容的数据提交到<code>MappedByteBuffer</code></li>
+<li><code>MappedByteBuffer</code>在内存中追加提交的内容 <code>wrotePosition</code>向后移动 然后返回</li>
+<li>commit操作咸亨共犯会后 将commitedPosition指针向后移动本次提交的内容长度</li>
+<li><code>FlushRealTimeService</code>线程默认每<strong>500ms</strong>将MappedBytebuffer中新追加的内存通过调用<code>MappedByteBuffer::force</code>方法将数据刷到磁盘</li>
+</ol>
+</li>
+</ul>
+<h3 id="过期文件删除"><a href="#过期文件删除" class="headerlink" title="过期文件删除"></a>过期文件删除</h3><p>RocketMQ不会永久存储消息文件在服务器上 并引入了一种机制来删除已过期的文件 RocketMQ<strong>顺序</strong>写<code>CommitLog</code>,<code>ConsumeQueue</code>文件 最后所有的写操作全部落在最后一个<code>Commitlog</code>或者<code>ConsumeQueue</code>文件上 之前的文件在下一个文件创建后将不会再被更新 RocketMQ清除过期文件的方法是:如果非当前写文件在一定时间间隔内没有再次被更新 则被认为是过期文件 RocketMQ也不会再关注该文件上的消息是否全部被消费 默认过期时间是72h 可通过在broker配置文件中设置<code>fileReservedTime</code>来改变过期时间</p>
+<p>rocketmq 会在如下情况对消息文件进行删除</p>
+<ol>
+<li>指定删除文件的时间点 在该时间点对过期消息文件进行删除</li>
+<li>磁盘空间是否充足 否则触发过期文件删除操作</li>
+<li>命令删除</li>
+</ol>
+<p>其通过<code>File::getFreeSpace</code>和<code>File::getTotalSpace</code>计算当前磁盘占用量 一旦占用超过指定值 默认0.85 将会触发立即删除过期文件 如果占用过高默认0.90将拒绝新消息写入</p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/MessageQueue/">MessageQueue</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "RocketMq 技术内幕读书笔记&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

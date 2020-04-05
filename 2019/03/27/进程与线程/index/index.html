@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>进程与线程 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Wednesday, March 27th 2019, 10:43 am
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    11.6k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      43 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="进程与线程"><a href="#进程与线程" class="headerlink" title="进程与线程"></a>进程与线程</h1><h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>正在运行的程序, 一种控制流集合, 集合中至少包括一条执行流, 执行流之间相互独立, 它们共享进程的所有资源</p>
+<p>进程= 线程 + 资源</p>
+<p>进程提供给应用程序的抽象:</p>
+<ul>
+<li>一个独立的逻辑控制流(好像程序独占的使用处理器一样)</li>
+<li>一个私有独立的地址空间(好像程序独立的使用内存一样)</li>
+</ul>
+<h3 id="虚拟地址空间"><a href="#虚拟地址空间" class="headerlink" title="虚拟地址空间"></a>虚拟地址空间</h3><p>典型的linux进程虚拟地址空间布局</p>
+<p><img src="/img/virtual_address_space.png" srcset="/img/loading.gif" alt="process"></p>
+<ul>
+<li>虚拟内存描述符</li>
+</ul>
+<p>linux中使用<code>mm_struct</code>来描述进程的虚拟内存空间 该结构体定义在<code>include/linux/mm_types</code>中 下面展示的是简化版本 可以看到其中定义了包括内存区域链表 VMA形成的红黑树 <code>spinlock_t page_table_lock</code>自旋页表锁 以及代码段 数据段 堆等的首尾地址 全部页面数 上锁页面数 分配的物理页数 正在使用该地址的进程数(由于linux自由国情在此 似乎说成任务 更严谨一些 当该值为0时 对应的描述符将被回收)等等 另外 <code>mmap</code>和<code>mm_rb</code>这两种数据结构都是用来描述地址空间中的全部内存区域的 前者以链表形式存放 后者以红黑树的形式存放 前者用于高效遍历 后者用于搜索指定元素(比如试图得到某个地址被包含在的VMA)</p>
+<ul>
+<li><p>关于页表锁</p>
+<p>  操作和检索页表时 必须使用<code>page_table_lock</code>锁字段 以防止竞争条件!</p>
+</li>
+</ul>
+<pre><code class="c">struct mm_struct {
+    struct {
+        struct vm_area_struct *mmap;        /* list of VMAs */
+        struct rb_root mm_rb;
+        u64 vmacache_seqnum;                   /* per-thread vmacache *
+        int map_count;            /* number of VMAs */
+
+        spinlock_t page_table_lock; /* Protects page tables and some
+                         * counters
+                         */
+        struct rw_semaphore mmap_sem;
+
+        struct list_head mmlist; /* List of maybe swapped mm&#39;s.    These
+                      * are globally strung together off
+                      * init_mm.mmlist, and are protected
+                      * by mmlist_lock
+                      */
+
+
+        unsigned long hiwater_rss; /* High-watermark of RSS usage */
+        unsigned long hiwater_vm;  /* High-water virtual memory usage */
+
+        unsigned long total_vm;       /* Total pages mapped */
+        unsigned long locked_vm;   /* Pages that have PG_mlocked set */
+        atomic64_t    pinned_vm;   /* Refcount permanently increased */
+        unsigned long data_vm;       /* VM_WRITE &amp; ~VM_SHARED &amp; ~VM_STACK */
+        unsigned long exec_vm;       /* VM_EXEC &amp; ~VM_WRITE &amp; ~VM_STACK */
+        unsigned long stack_vm;       /* VM_STACK */
+        unsigned long def_flags;
+
+        spinlock_t arg_lock; /* protect the below fields */
+        unsigned long start_code, end_code, start_data, end_data;
+        unsigned long start_brk, brk, start_stack;
+        unsigned long arg_start, arg_end, env_start, env_end;
+
+        unsigned long saved_auxv[AT_VECTOR_SIZE]; /* for /proc/PID/auxv */
+        } __randomize_layout;
+
+        unsigned long cpu_bitmap[];
+};</code></pre>
+<p>在任务描述符中<code>task_struct</code> <code>mm域</code>存放着仅策划那个使用的内存描述符 <code>fork()</code>函数利用<code>copy_mm()</code>函数复制父进程的内存描述符 如果父进程希望子进程共享地址空间 可以在调用<code>clone()</code>时 设置<code>CLONE_VM</code>表示 通常这样的进程被称为线程</p>
+<h3 id="虚拟内存区域"><a href="#虚拟内存区域" class="headerlink" title="虚拟内存区域"></a>虚拟内存区域</h3><p>由<code>vm_area_struct</code>结构体描述 定义在文件<code>linux/mm_types</code>中 内存区域在Linux内核中也经常称作虚拟内存区域 其描述了指定地址空间内连续区间上的一个独立内存范围 内核将每个内存区域作为一个单独的内存对象进行管理 每个内存区用于偶一致的属性 如访问权限 和支持的操作等</p>
+<pre><code class="c">/*
+ * This struct defines a memory VMM memory area. There is one of these
+ * per VM-area/task.  A VM area is any part of the process virtual memory
+ * space that has a special rule for the page-fault handlers (ie a shared
+ * library, the executable area etc).
+ */
+struct vm_area_struct {
+    /* The first cache line has the info for VMA tree walking. */
+
+    unsigned long vm_start;        /* Our start address within vm_mm. */
+    unsigned long vm_end;        /* The first byte after our end address
+                       within vm_mm. */
+
+    /* linked list of VM areas per task, sorted by address */
+    struct vm_area_struct *vm_next, *vm_prev;
+
+    struct rb_node vm_rb;
+
+    /*
+     * Largest free memory gap in bytes to the left of this VMA.
+     * Either between this VMA and vma-&gt;vm_prev, or between one of the
+     * VMAs below us in the VMA rbtree and its -&gt;vm_prev. This helps
+     * get_unmapped_area find a free area of the right size.
+     */
+    unsigned long rb_subtree_gap;
+
+    /* Second cache line starts here. */
+
+    struct mm_struct *vm_mm;    /* The address space we belong to. */
+
+    /*
+     * Access permissions of this VMA.
+     * See vmf_insert_mixed_prot() for discussion.
+     */
+    pgprot_t vm_page_prot;
+    unsigned long vm_flags;        /* Flags, see mm.h. */
+
+    /*
+     * For areas with an address space and backing store,
+     * linkage into the address_space-&gt;i_mmap interval tree.
+     */
+    struct {
+        struct rb_node rb;
+        unsigned long rb_subtree_last;
+    } shared;
+    /*
+     * A file&#39;s MAP_PRIVATE vma can be in both i_mmap tree and anon_vma
+     * list, after a COW of one of the file pages.    A MAP_SHARED vma
+     * can only be in the i_mmap tree.  An anonymous MAP_PRIVATE, stack
+     * or brk vma (with NULL file) can only be in an anon_vma list.
+     */
+    struct list_head anon_vma_chain; /* Serialized by mmap_sem &amp;
+                      * page_table_lock */
+    struct anon_vma *anon_vma;    /* Serialized by page_table_lock */
+
+    /* Function pointers to deal with this struct. */
+    const struct vm_operations_struct *vm_ops;
+
+    /* Information about our backing store: */
+    unsigned long vm_pgoff;        /* Offset (within vm_file) in PAGE_SIZE
+                       units */
+    struct file * vm_file;        /* File we map to (can be NULL). */
+    void * vm_private_data;        /* was vm_pte (shared mem) */
+    ....
+    struct vm_userfaultfd_ctx vm_userfaultfd_ctx;
+} __randomize_layout;</code></pre>
+<p>注意其中的<code>flags</code> 字段 其记录了这段<code>VMA</code>的特定 如如可读 可写 可执行 区域增长方向 页面是否共享 是否可用于共享内存 或用于映射设备I/O空间等等 可参见<code>linux/mm.h</code>头文件</p>
+<p>对于实际使用中 进程的内存空间的使用情况 可以通过查看<code>/proc/&lt;pid&gt;/maps</code>文件来查看 也可以用<code>pmap &lt;pid&gt;</code>命令查看</p>
+<h2 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h2><p><img src="/img/process_queue.jpg" srcset="/img/loading.gif" alt="pq"></p>
+<p>当进程创建完毕后 他们被放入就绪队列 队列通常以链表的形式被组织起来 就绪队列的header拥有一个指向列表上的第一PCB块的指针</p>
+<p>同时当一个正在运行中的线程被中断(中断会使CPU终止当前任务并去执行内核例程) 或等待某个特殊事件的发生时–比如该进程发起了I/O请求 由于I/O设备速度较慢 这些进程将会挂起等待I/O完成 并被置入等待队列</p>
+<p><img src="/img/process_schedule_2.png" srcset="/img/loading.gif" alt=""></p>
+<p>上图显示了三种被置入等待队列的情况</p>
+<ol>
+<li>当前进程发起了I/O请求 然后被置入I/O等待队列</li>
+<li>当前进程创建了子进程 并被置入等待队列中等待子进程执行完毕</li>
+<li>当前进程时间片用尽 被强制换下处理器 置入等待队列</li>
+</ol>
+<ul>
+<li>进程的类型</li>
+</ul>
+<ol>
+<li>I/O密集型 在等待I/O上花费了绝大多数时间</li>
+<li>计算机密集型 花费了绝大部分时间在计算上</li>
+</ol>
+<ul>
+<li>何时调度</li>
+</ul>
+<ol>
+<li>创建一个进程之后 需要决定是运行父进程还是子进程 由于两者都处于就绪态 故这是一个正常的调度决策 可以任意决定</li>
+<li>一个进程退出时 必须做出调度决策 一个进程不在运行 就必须从就绪进程中选择某个另外的  如果没有就绪的进程通常会运行一个系统提供的空闲进程</li>
+<li>当一个进程阻塞在I/O或信号量上或由于其他原因阻塞时</li>
+<li>在一个I/O中断发生时 就必须做出调度决策 如果中断来自I/O设备 而该设备现在完成运作 某些被阻塞的等待该I/O进程就可以称为运行的就绪进程了 是让新就绪的进程运行还是继续运行当前程序 由<strong>调度程序</strong>决定</li>
+</ol>
+<ul>
+<li><p>上下文切换</p>
+<p>  上下文是由程序正确运行所需的状态组成的 包括存放在内存中的程序数据和代码 通用目的寄存器 栈 程序寄存器 环境变量以及程序所打开的文件描述符的集合</p>
+</li>
+</ul>
+<p>将当前CPU 核心分配给其他进程需要保存现场进程的状态至PCB 并从下一个进程的PCB中恢复其状态 上下文切换是一项纯粹的开销 上下文切换的速度取决于内存的速度 需要保存/恢复的寄存器数量and the existence instructions?(不太清除这是啥意思) 通常这一过程会在若干微秒内完成</p>
+<ul>
+<li><p>Dispatcher</p>
+<p>  Cpu调度函数的另一个部分是分派器(Dispacher不确定怎么称呼 就姑且给它这么翻译了) 其负责将Cpu核心的控制权交给由调度器选定的另一个线程 这涉及到如下工作</p>
+<ol>
+<li><p>切换上下文至另一个进程</p>
+</li>
+<li><p>切换至用户态</p>
+</li>
+<li><p>跳转到用户程序中合适的执行位置来恢复程序的执行</p>
+<p>由于每次上下文切换时都会调用 故调度器要尽可能快的完成工作 其停止当前进程并切换到另一个进程运行的时间称之为分派时延(原文是 Dispatch latency) </p>
+<p>在linux中我们可以通过cat /proc/{proc_num}/status 来查看指定进程的切换情况</p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="调度水平的衡量"><a href="#调度水平的衡量" class="headerlink" title="调度水平的衡量"></a>调度水平的衡量</h3><ol>
+<li>cpu利用率</li>
+<li>吞吐量 单位时间内完成的进程数</li>
+<li>turnaround time 从特定进程的视角来看 一个重要的指标是该进程执行总共花费了多长时间 其是进程在就绪队列中的等待时间 CPU执行时间和I/O执行时间之和</li>
+<li>等待时间 进程在就绪队列中的等待时间</li>
+<li>响应时间 交互系统而言</li>
+</ol>
+<h3 id="交互式系统中的调度"><a href="#交互式系统中的调度" class="headerlink" title="交互式系统中的调度"></a>交互式系统中的调度</h3><p>队列</p>
+<ul>
+<li>轮转调度(Round-Robin Scheduling)</li>
+</ul>
+<p>每个进程都被分配一个时间段 称为<strong>时间片(quantum)</strong> 即允许该进程在该时间段中运行 如果时间片结束时该进程还在运行 或 该进程提前结束或阻塞 则将剥夺CPU使用权并分配给另一个进程</p>
+<p>该算法实现较为简单 只需要维护一张可运行的进程(线程)列表 当一个进程用完它的时间片后 就被移到队列的末尾</p>
+<pre><code>- 时间片
+
+    从一个进程切换到另一个需要一定的时间进程管理事务处理----保存和装入寄存器值及内存映像 更新各种表格和列表 清除和重新调入内存高速缓存等
+
+    时间片设置的太长会导致过多的进程切换 降低CPU效率 设置太长又可能引起对短交互请求的响应时间变长</code></pre><ul>
+<li>优先级调度</li>
+</ul>
+<p>每个进程被赋予一个优先级 优先级高的进程先运行</p>
+<p>为了防止高优先级永无止尽的运行下去使其他的进程长期处理’饥饿’状态 我们可以设置最长一   个允许运行的最大时间片 持续占用CPU时间超过所允许的时间则进行切换 也可以使低优先级的进程随着等待时间的增加而增长</p>
+<p>优先级也可以由系统动态的决定 对于I/O密集型进程 其需要CPU时 应立即分配之 以便启动下一个I/O请求 这样就可以在另一个进程计算的同时执行I/O操作 这种I/O密集型进程长期等待CPU只会造成其无谓的占用内存 对于使I/O密集型进程获得较好服务的一种简单的算法是将其优先级设置为1/f,f为该进程在一次时间片中所占的部分</p>
+<p>也可以将进程安优先级分类 各类之间优先级调度 各类之内使用轮转调度在高优先级的进程组中不为空时不理会低优先级进程 但这样的设计可能会使低优先级进程产生饥饿现象(……)</p>
+<h3 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h3><ul>
+<li><p>先来先服务(First Come First Served)</p>
+<p>  这种算法下 先请求CPU的进程会先被分配到CPU 该算法可以很简单的以FIFO队列实现 然而 这种算法下 进程的平均等待时间过长</p>
+</li>
+<li><p>短作业优先法(Short-Job-First)</p>
+<p>  该算法根据每个进程占用CPU时间片的长度进行安排 将占用时间片最少的进程优先处理 如果两个进程的占用CPU时间片相同则根据FCFS处理</p>
+<p>  该方法的进程平均等待时间是最短的 但是它不能CPU调度所完好的实现 因为无法知道下一个进程究竟会需要多长的时间片 只能采用如指数平均法进行预测</p>
+<p>  <img src="/img/exponential_average.png" srcset="/img/loading.gif" alt=""></p>
+</li>
+<li><p>时间片轮转调度(RR)</p>
+</li>
+<li><p>优先级调度</p>
+</li>
+<li><p>多层队列调度(Multilevel Queue Scheduling)</p>
+<p>  优先级调度算法仅仅由队列实现将使寻找最大优先级的工作时间复杂度达到O(n) 因此我们可以使用多级队列 并于RR算法相结合 可以有效的降低时间复杂度</p>
+<p>  <img src="/img/ml_q.png" srcset="/img/loading.gif" alt=""></p>
+</li>
+<li><p>多层反馈队列调度(Multilevel Feedback Queue Scheduling)</p>
+<p>  对多层队列调度的改进</p>
+<p>  据CPU burst的特点区分进程。如果进程使用过多CPU时间则转移到更低队列，在低priority队列中等待时间过长的进程可被转移到高priority队列（aging的一种形式）。</p>
+<ul>
+<li><p>可由以下参数定义:</p>
+<ol>
+<li>队列数量</li>
+</ol>
+</li>
+</ul>
+<ol start="2">
+<li>每个队列的调度算法</li>
+<li>用于确定何时升级到更高priority队列的方法</li>
+<li>用于确定何时降级到更低priority队列的方法</li>
+<li>用于确定进程需要服务时应进入哪个队列的方法</li>
+</ol>
+</li>
+</ul>
+<h3 id="Linux中的进程调度实现"><a href="#Linux中的进程调度实现" class="headerlink" title="Linux中的进程调度实现"></a>Linux中的进程调度实现</h3><p>Linux调度器是以模块方式提供的 这样做的目的是允许不同类型的进程可以有针对性的选择调度算法 其允许多种不同的可动态添加的调度算法并存 调度属于自己范畴的进程 每个调度器都有一个优先级 基础的调度器代码定义在<code>kernel/shed.c</code>中 其按照优先级数序遍历调度类 拥有一个可执行进程的最高优先级调度器类胜出</p>
+<p>就像之前讨论的 进程调度器有两个通用概念:<strong>进程优先级和时间片</strong></p>
+<ul>
+<li><p>关于优先级</p>
+<p>  linux中有两种不同的优先级范围</p>
+<p>  第一种采用nice值 越大的nice值意味着越低的优先级</p>
+<p>  第二种是实时优先级 越高的实时优先级数值意味着进程优先级越高 任何实时进程的优先级都高于普通的进程</p>
+</li>
+<li><p>关于时间片</p>
+<p>  一个用以表示被抢占前该进程能持续运行时间的数值 任何长时间片都将导致系统交互表现欠佳</p>
+</li>
+</ul>
+<p>linux中进程调度的入口点是函数<code>schedule</code> 其定义在<code>kernel/sched.c</code>(在2.7之前的版本)中 是内核其他部分用于进程调度的入口 schedule通常都需要和一个具体的调度类相关联 也就是说它会找到一个最高优先级的调度类 后者需要有自己的可运行队列 最终获得下一个该运行的进程</p>
+<h4 id="CFS-Completely-Fair-Scheduler"><a href="#CFS-Completely-Fair-Scheduler" class="headerlink" title="CFS(Completely Fair Scheduler)"></a>CFS(Completely Fair Scheduler)</h4><p>基于这样的理念: <strong>进程的调度效果应如系统具备一个理想中的完美多任务处理器 在这种系统中每个进程都能获得1/n的处理器时间 n是可运行进程的数量</strong></p>
+<p>CSF首先在所有可运行进程总数的基础上 计算出一个进程应该运行多久 然后每个进程都按其权重(越低的nice 越高的权重)在全部可运行进程中所占比例的”时间片”来运行 但是当可运行任务数量趋于无限时 它们各自所获得的处理器使用比和时间片都将趋于0 并由此带来不能忍受的过高的切换消耗 CFS为此引入每个进程获得的时间片底线 这个底线称为最小粒度 默认情况下这个值是1ms</p>
+<p>当CFS需要选择下一个运行进程时 它会挑一个具有最小<code>vruntime</code>(存放进程的虚拟运行时间 CSF使用该变量来记录一个程序运行了多久以及计算其还应运行多久)</p>
+<p>CSF使用<strong>红黑树</strong> 来组织可运行的进程队列 并利用其迅速找到最小<code>vruntime</code>的进程</p>
+<ul>
+<li><p>休眠</p>
+<p>  休眠的进程处于一个特殊的不可执状态 如果没有这种状态 调度程序可能会选出一个暂时无法(不想)往下执行的进程 且休眠就必须以轮询的方式实现</p>
+<p>  通常休眠都是为了等待一些事件 可能是一段时间从文件I/O读更多数据 或是某个硬件事件 一个进程还有可能在尝试获取一个已被占用的内核信号量时被迫休眠 还有文件I/O等等</p>
+<p>  对于将要进入休眠的进程 内核將之标记为休眠状态 然后从可执行红黑树中移除 放入<strong>等待队列</strong>  然后schedule调用其他可运行进程 唤醒的过程整好相反</p>
+<ul>
+<li><p>唤醒</p>
+<p>  唤醒操作通过<code>wake_up()</code>进行 它调用函数<code>try_to_wake_up()</code> 唤醒指定的等待队列上的所有进程 将之设置为<code>TASK_RUNNING</code>状态 调用<code>enqueue_task()</code>将此进程放入红黑树中 通常哪段代码促使条件的达成 它就要负责对等待队列调用<code>wake_ip()</code></p>
+</li>
+</ul>
+</li>
+<li><p>放弃处理器时间 </p>
+<p>  linux通过<code>sched_yield()</code>系统调用  提供了一种让进程显示的将处理器时间让给其他等待执行进程的机制 其通过将进程从活动队列中移到过期队列实现的 从而不仅使该进程被抢占 还能确保其在一定时间内不会再被执行了</p>
+</li>
+</ul>
+<h2 id="IPC"><a href="#IPC" class="headerlink" title="IPC"></a>IPC</h2><p>通常下IPC的实现有如下几种实现方式:</p>
+<ol>
+<li>共享内存(文件)</li>
+<li>管道</li>
+<li>信号量</li>
+<li>消息队列</li>
+</ol>
+<h3 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h3><p>造成并发访问的情况包括:</p>
+<ol>
+<li>中断</li>
+<li>软中断和tasklet</li>
+<li>内核抢占</li>
+<li>睡眠及用户空间的同步</li>
+<li>对称多任务</li>
+</ol>
+<h3 id="临界区"><a href="#临界区" class="headerlink" title="临界区"></a>临界区</h3><p>我们把对共享内存进行访问的程序片段称为临界区(Critical Section) 如果我们适当的安排 使得两个进程不可能同时处于临界区中 那么就能够避免竞态条件</p>
+<p>一个好的临界区设计应满足以下几点</p>
+<ol>
+<li>任何两个进程不能同时处于临界区</li>
+<li>不应对CPU的速度和数量做任何假设</li>
+<li>临界区外的进程不能阻塞其他进程</li>
+<li>不得使进程无限期的等待进入临界区</li>
+</ol>
+<p><img src="/img/critical_area.jpg" srcset="/img/loading.gif" alt=""></p>
+<ul>
+<li>方案</li>
+</ul>
+<ol>
+<li><p>屏蔽中断</p>
+<p> 每个进程刚进入临界区后立刻屏蔽所有中断 在离开之前再打开中断 但是由于众所周知的原因—CPU只有发生时钟中断或者其他中断时才会进行进程切换 这样虽然可以保证本进程退出临界区前不会有其他进程进入 但是 却把屏蔽中断的权力交给了进程 这可能导致整个系统终止 <strong>且如果是多处理器系统 那么屏蔽中断仅仅对disable指令所指定的CPU有效其它CPU仍将照旧运行</strong></p>
+</li>
+<li><p>锁变量</p>
+<p> 设想有一个共享锁变量 其初始值为0 当一个进程想进入临界区时 首先测试这把锁 如果该锁为0 则该进程将其设置为1并进入临界区 若为1 则等待直到0</p>
+<p> 但是这种实现方式 在并发条件下 仍有可能会由两到多个进程进入临界区 比如考虑 进程A读该变量发现为0 进入临界区 在將之置为1之前进程2也读了该变量 那么进程2也会进入临界区</p>
+</li>
+<li><p>严格轮询法</p>
+<p> <img src="/img/emmm.jpeg" srcset="/img/loading.gif" alt=""></p>
+<p> 整形变量turn用于记录轮到哪个进程进入临界区</p>
+<p> 该方案严格的要求两个进程轮流进入临界区 但是在两个进程运行速度差距较大的情况—考虑进程0 执行完临界区代码后将turn设置为1 而进程1 还在完成上一次的非临界区代码 那么 进程0如果想要再次执行临界区代码 就只能等待进程1完成 不满足临界区设计的第3点</p>
+</li>
+<li><p>Peterson算法</p>
+<p> <img src="/img/peterson.png" srcset="/img/loading.gif" alt=""></p>
+<p> 考虑两个进程同时进入enter_region的情况 它们都将自己的pid存入turn中 其中先进入的进程设置的pid将被后进入的覆盖掉 假设进程1后进入 那么两个进程都执行到while时 进程0会循环0次并直接进入临界区 而进程1则不能 只能等待进程0在调用leave_region后 才能进入临界区</p>
+</li>
+<li><p>TSL(test and set lock) 指令</p>
+<p> 其将一个内存字lock读到寄存器RX中 然后在该内存地址上存一个非0值 读字和写字操作保证是不可分的 即该指令结束之前其他处理器均不允许访问该内存字 执行TSL指令的CPU将锁住内存总线 以禁止其他CPU在本指令结束之前访问内存</p>
+<p> 一个可替代该指令的指令是XCHG 该指令原子的交换了两个位置的内容</p>
+</li>
+</ol>
+<ul>
+<li><p><strong>关于锁住存储总线和屏蔽中断的区别</strong></p>
+<p>  屏蔽中断 然后在读内存字之后跟着写操作并不能阻止总线上的第2个处理器在读操作和写操作之间访问该内存字 事实上 处理器1上屏蔽中断对处理器2不会有任何影响 让处理器2远离内存的唯一方法直到处理器1完成的唯一方法就是锁住总线</p>
+</li>
+</ul>
+<h3 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h3><p>使用一个整型变量来累计唤醒次数 供以后使用 一个信号量的取值 可以是0或正值</p>
+<p>其有两个基本操作 down和up</p>
+<p>对于down 检查其值是否大于0 大于则减1 小于则睡眠 检查数值 修改变量值以及可能发生的睡眠操作均为一个单一 不可分割的原子操作</p>
+<p>up对信号量的值增1 如果有一个或多个进程在该信号量上睡眠 无法完成一个先前的down 则系统选择一个唤醒并允许该进程完成其down操作 该操作同样保持原子性</p>
+<p><img src="/img/samaphore_cons_prod.jpg" srcset="/img/loading.gif" alt=""></p>
+<h3 id="互斥量"><a href="#互斥量" class="headerlink" title="互斥量"></a>互斥量</h3><p>可以视为信号量的简化版本 其没有后者的计数能力 只有<strong>加锁和解锁</strong>两个状态</p>
+<p><img src="/img/mutex.jpg" srcset="/img/loading.gif" alt=""></p>
+<h3 id="管程-Monitor"><a href="#管程-Monitor" class="headerlink" title="管程(Monitor)"></a>管程(Monitor)</h3><p><strong>一个管程是由过程 变量 及数据结构组成的一个集合</strong> 它们组成一个特殊的模块或软件包 进程可以在任何需要的时候调用管程中的过程 但它们<strong>不能在管程之外的过程中直接访问管程内的数据结构</strong>(JAVA的synchronized关键字配合对象锁就非常满足这个定义 个人感觉)</p>
+<p>管程中任意时刻只能有一个活跃进程 这一特性使其能有效的完成互斥</p>
+<p>其是编程语言的组成部分 因此编译器可以采用与其他过程调用不同的方法来处理对管程的调用</p>
+<p>管程有两个相关的操作wait和signal</p>
+<ul>
+<li>wait</li>
+</ul>
+<p>一个管程发现其无法继续运行时 它会在某个条件变量上调用wait操作 该操作导致自身阻塞 并将使另一个之前等待在管程之外的进程调入管程</p>
+<ul>
+<li>signal</li>
+</ul>
+<p>可以用来唤醒正在睡眠中的管程</p>
+<h3 id="屏障-Barrier"><a href="#屏障-Barrier" class="headerlink" title="屏障(Barrier)"></a>屏障(Barrier)</h3><p>通过在每个阶段的结尾设置屏障 可以使只有所有的进程由就绪准备下一个阶段 否则任何进程都不能进入一个阶段 到一个进程到达屏障时 它就被屏障阻拦 直到所有的进程都到达该屏障为止</p>
+<h2 id="多任务"><a href="#多任务" class="headerlink" title="多任务"></a>多任务</h2><p>windows 中的进程和线程是严格区分的 即每一个进程都有对应的pcb 每一个线程都有对应的tcb</p>
+<p>而Linux中 所有的执行实体都称为 <strong>任务(Task)</strong> 每一个任务都类似于一个单线程的进程 具有内存空间 执行实体 文件资源等 不过Linux下不同的任务之间可以选择共享内存空间 因而实际意义上 共享了同一个内存空间的多个任务构成了一个进程 也就是说每一个线程都有自己<code>task_struct</code> 这些任务也就成了这个进程里的线程 </p>
+<p><img src="/img/Linux_task_struct.png" srcset="/img/loading.gif" alt=""></p>
+<p>举例说明: 假设一个进程有四个线程 对于对线程有专门的支持到的系统而言 通常会有一个指向包含四个不同的线程的进程描述符 该描述符负责描述向地址空间 打开文件等这样的共享资源 而线程本身再区描述它独占的资源 而linux仅仅创建四个进程并分配四个普通的<code>task_struct</code> 建立这四个进程时指明它们的共享资源</p>
+<p>即便是如C语言中的pthread_create这样的函数其本质上也是如此 在用这个函数创建一个新的线程时 不过是将线程同样映射到进程空间上即可</p>
+<p>以下来自<a href="https://stackoverflow.com/questions/4854940/how-does-pthread-work" target="_blank" rel="noopener">StackOverFlow</a>中的说明</p>
+<blockquote>
+<p>On Linux, both fork() and ptrheads use the same syscall clone(), which creates a new process. The difference between them is simply the parameters they send to<br>clone(), when creating a new thread, it simply makes both processes use the same memory mappings.</p>
+<p>Remember, in Linux (and other modern Unixes), memory mappings, stacks, processor state, PIDs, and others are orthogonal features of a process; so you can create<br>a new process with just a new stack and process state (sharing everything else), and call it a thread.</p>
+</blockquote>
+<p>linux中没有tcb pcb的专用数据结构 而是统一的使用了<strong>task_struct</strong>结构体 在linux 0.11中该结构体定义如下 Linux中进程间具有明显的继承关系 所有的进程都是pid为1的init进程的子进程 内核在系统启动的最后阶段启动init进程 该进程读取系统最初的初始化脚本并执行相关程序 最终完成系统启动的整个过程 每个进程都有一个父进程和0到多个子进程</p>
+<pre><code class="c">struct task_struct
+{
+/* these are hardcoded - don&#39;t touch */
+    long state;            /* -1 unrunnable, 0 runnable, &gt;0 stopped */
+    long counter;
+    long priority;
+    long signal;
+    struct sigaction sigaction[32];
+    long blocked;            /* bitmap of masked signals */
+/* various fields */
+    int exit_code;
+    unsigned long start_code, end_code, end_data, brk, start_stack;
+    long pid, father, pgrp, session, leader;
+    unsigned short uid, euid, suid;
+    unsigned short gid, egid, sgid;
+    long alarm;
+    long utime, stime, cutime, cstime, start_time;
+    unsigned short used_math;
+/* file system info */
+    int tty;            /* -1 if no tty, so it must be signed */
+    unsigned short umask;
+    struct m_inode *pwd;
+    struct m_inode *root;
+    struct m_inode *executable;
+    unsigned long close_on_exec;
+    struct file *filp[NR_OPEN];
+/* ldt for this task 0 - zero 1 - cs 2 - ds&amp;ss */
+    struct desc_struct ldt[3];
+/* tss for this task */
+    struct tss_struct tss;
+}</code></pre>
+<table>
+<thead>
+<tr>
+<th>线程</th>
+<th>进程</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>资源调度的最小单位</td>
+<td>资源分配的最小单位</td>
+</tr>
+<tr>
+<td>复用进程数据结构</td>
+<td>task_struct</td>
+</tr>
+<tr>
+<td>使用进程的地址空间</td>
+<td>用有独立的地址空间</td>
+</tr>
+</tbody></table>
+<h2 id="调度-1"><a href="#调度-1" class="headerlink" title="调度"></a>调度</h2><p>现代操作系统采用时分的形式调度运行的线程 操作系统会分出一个个时间片 线程会分配到若干时间片 当时间片用完即发生线程调度 并等待下次分配</p>
+<h2 id="内核线程与用户线程"><a href="#内核线程与用户线程" class="headerlink" title="内核线程与用户线程"></a>内核线程与用户线程</h2><ul>
+<li>线程是什么</li>
+</ul>
+<p>线程一段函数的载体 本质上就是一段独立的执行流 有自己寄存器映像 上下文环境 内存资源和栈 对于任务调度器而言 执行流(线程)是调度的基本单元</p>
+<ul>
+<li>任务调度器</li>
+</ul>
+<p>OS用于进行任务的轮转调度的由处理器运行的一个软件模块 是OS的一部分 调度器在内部维护一个任务表(进程表/线程表/调度表) 然后按照一定的算法从任务表中选择一个任务 再将该任务放到处理器上运行 其是多任务操作系统的核心</p>
+<p>线程的实现有两种方式 由操作系统原生支持 用户通过系统调用使用线程 要么操作系统不支持线程 由进程自己实现 因此线程要么在0特权级的内核中实现 要么在3特权级上的用户空间实现</p>
+<p>两种情况下的实现方式</p>
+<ol>
+<li>用户空间中实现线程</li>
+</ol>
+<p>用户空间中实现线程的好处是可移植性强</p>
+<p>在不支持线程的Os上 OS调度器只以整个进程的方式调度 将处理器的使用权交给这个线程 然后由进程中的调度器自己去协调分配处理器时间 即需要在进程内实现线程表</p>
+<pre><code>* 优点
+
+    1. 线程调度算法是由用户程序自己实现的 可以根据应用情况为某些线程加权调度
+    2. 将线程的寄存器装载到cpu时 可以在用户空间完成 即不用陷入到内核态 这样就免去了进入内核时的入栈及出栈操作 减少了陷入内核态的代价
+
+* 缺点
+
+    1. 进程中的某个线程若出现了阻塞 而操作系统不知道进程中存在线程(它会认为该进程是传统的单线程进程) 因此会将整个进程挂起 即进程中到全部线程都无法运行
+    2. 线程在用户空间实现 和在内核空间相比只是在内部操作系统
+
+内核提供的线程可以让进程占用更多的处理器资源(一个内核调度来讲 一个进程内部有更多的线程 相对于其在调度器中拥有更多的独立的执行流) 从而真正实现程序的&#39;提速&#39; 且当某线程阻塞后 由于线程由内核空间实现 所以只会阻塞本线程 进程内的其他线程不受影响</code></pre><h2 id="用户态与内核态"><a href="#用户态与内核态" class="headerlink" title="用户态与内核态"></a>用户态与内核态</h2><p>处理器与OS提供的一种机制来限制应用程序可以自由访问的地址空间范围</p>
+<p>处理器通常是通过某个控制寄存器中的一个模式位(mode bit)来提供这种功能的 该寄存器描述了当前进程享有的特权 设置了模式位时 进程运行在内核态中 否则则是用户态 在用户态下 进程不能执行任何特权指令 内核态下则可以执行指令集中的任何指令并可以访问系统中的任何位置</p>
+<p>进程可通过<strong>中断 故障或陷入系统调用</strong>等手段进入内核态</p>
+<p>Linux中可以通过/proc来访问内核的数据结构 其将许多内核数据结构输出为一个用户程序可以读的文本文件层次结构</p>
+<h2 id="进程控制"><a href="#进程控制" class="headerlink" title="进程控制"></a>进程控制</h2><p>C语言中的相关的库函数都定义在&lt;unistd.h&gt;文件中</p>
+<ul>
+<li>fork系统调用</li>
+</ul>
+<p>由于采取了写时复制 fork的实际开销就是复制父进程的页表以及给子进程创建唯一的进程描述符</p>
+<p>其在父进程中会返回子进程pid 子进程中返回0</p>
+<pre><code class="c">extern __pid_t fork (void) __THROWNL;</code></pre>
+<p>子进程与父进程</p>
+<ul>
+<li>并发执行 子进程和父进程是并发运行的独立进程</li>
+<li>相同但是独立的地址空间</li>
+<li>共享文件</li>
+</ul>
+<p>输入:</p>
+<pre><code class="c">#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+void main() {
+    pid_t pid;
+    int x=1;
+    pid = fork();
+    if (pid == 0) {
+        printf(&quot;print from child: %d\n&quot;, ++x);
+        exit(0);
+    }
+    printf(&quot;Print from parent: %d\n&quot;, --x);
+    exit(0);
+}</code></pre>
+<p>输出如下:</p>
+<pre><code>Print from parent: 0
+print from child: 2</code></pre><ul>
+<li>回收子进程</li>
+</ul>
+<p>当一个进程由于某种原因终止时 内核不是立即把它从系统中清除 而是将其保持在一种已终止的状态中 直到其被它的父进程回收 当父进程回收已终止的子进程时 内核将子进程的退出状态传递给父进程 然后抛弃已终止的进程 从此该进程才会不存在 一个终止但未被回收的进程称为<strong>僵死进程(Zombie)</strong></p>
+<p>一个进程可以通过waitpid函数来等待其子进程终止或停止</p>
+<ul>
+<li>使进程休眠</li>
+</ul>
+<pre><code class="c">extern unsigned int sleep (unsigned int __seconds);</code></pre>
+<ul>
+<li>使调用函数休眠 直到收到某个信号</li>
+</ul>
+<pre><code class="c">extern int pause (void)</code></pre>
+<ul>
+<li>加载并运行程序</li>
+</ul>
+<pre><code class="c">execve(const char* name, const char* const* argv)</code></pre>
+<ul>
+<li>exit()</li>
+</ul>
+<p>终止进程 该调用释放掉进程占用的资源 并在最后调用<code>schedule</code>使CPU调度下一个进程 该调用永不返回 通常C编译器会在main的返回点放置调用<code>exit</code>的代码</p>
+<ul>
+<li>关于execve与fork的区别</li>
+</ul>
+<p>首先要理解程序与进程的区别 程序是一堆代码和数据 可以作为目标文件存在于磁盘上 或者作为段存在于地址空间中 进程是执行中程序的一个具体的实例 程序总是运行在某个进程的上下文中</p>
+<p>fork函数在新的子进程中运行相同的程序 新的子进程是父进程的一个复制品 而execve函数在当前进程的上下文加载并运行一个新的程序 其会覆盖当前进程的地址空间 但是并没有创建一个新的进程 新的程序仍然有相同的pid 并且继承了调用execve函数时已经打开的所有文件描述符</p>
+<p>execve 调用一次且从不返回 除非没找到要加载运行的目标文件</p>
+<ul>
+<li><p>关于malloc与mmap</p>
+<ul>
+<li><p>malloc</p>
+<p>  调用malloc()时，是在PCB表(进程表)结构中的堆重点内容中申请空间，若申请空间失败，即超过给定的堆最大空间时，将会调用brk()系统调用，将堆空间向未使用的区域扩展，brk()之后新增的堆空间不会自动清除，需使用相应的系统调用来清除</p>
+</li>
+<li><p>mmap</p>
+<p>  调用mmap()系统调用使得进程之间通过映射同一个普通文件实现共享内存 普通文件被映射到进程地址空间后，进程可以像访问普通内存一样对文件进行访问，不必再调用read()，write（）等操作</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="关于mmap的进一步说明"><a href="#关于mmap的进一步说明" class="headerlink" title="关于mmap的进一步说明"></a>关于mmap的进一步说明</h2><p>大部分摘自<a href="https://nieyong.github.io/wiki_cpu/mmap%E8%AF%A6%E8%A7%A3.html" target="_blank" rel="noopener">这位大佬的博客</a></p>
+<p>mmap–内存映射，简而言之就是将内核空间的一段内存区域映射到用户空间。映射成功后，用户对这段内存区域的修改可以直接反映到内核空间，相反，内核空间对这段区域的修改也直接反映用户空间。那么对于内核空间与用户空间两者之间需要大量数据传输等操作的话效率是非常高的。当然，也可以将内核空间的一段内存区域同时映射到多个进程，这样还可以实现进程间的共享内存通信。</p>
+<p>系统调用mmap()就是用来实现上面说的内存映射。最常见的操作就是文件（在Linux下设备也被看做文件）的操作，可以将某文件映射至内存(进程空间)，如此可以把对文件的操作转为对内存的操作，以此避免更多的lseek()与read()、write()操作，这点对于大文件或者频繁访问的文件而言尤其受益。</p>
+<p>mmap的函数原型生命在<code>linux/mm.h</code>中 该函数性设由file参数指定的文件 具体映射的是从偏移offset处开始 长度为len字节的范围内的数据 如果file参数是NULL且offset参数也是0 那么这种情况就被称为<strong>匿名映射(anonymouse mapping)</strong> 如果指定了文件和偏移量 那么这种映射就被称为 <strong>文件映射(file-backed mapping)</strong>  除此之外还可以指定从虚拟内存空间的某个地址开始搜索(利用最开头虚拟地址空间部分所说的红黑树进行搜索) 以及所申请的内存段的属性(如映射是否可以共享 可读可写可执行 在I/O操作上是否阻塞等等) 而如果要删除地址区间则可以用<code>mummap</code>函数</p>
+<pre><code class="c">extern unsigned long do_mmap(struct file *file, unsigned long addr,
+    unsigned long len, unsigned long prot, unsigned long flags,
+    vm_flags_t vm_flags, unsigned long pgoff, unsigned long *populate,
+    struct list_head *uf);</code></pre>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>mmap将一个文件或者其它对象映射进内存。文件被映射到多个页上，如果文件的大小不是所有页的大小之和，最后一个页不被使用的空间将会清零。munmap执行相反的操作，删除特定地址区域的对象映射。</p>
+<p>当使用mmap映射文件到进程后，就可以直接操作这段虚拟地址进行文件的读写等操作，不必再调用read，write等系统调用。但需注意，直接对该段内存写时不会写入超过当前文件大小的内容。</p>
+<p>采用共享内存通信的一个显而易见的好处是效率高，因为进程可以直接读写内存，而不需要任何数据的拷贝。对于像管道和消息队列等通信方式，则需要在内核(因为很多I/O操作都是在内核模式下完成的)和用户空间进行四次的数据拷贝，而共享内存则只拷贝两次数据：一次从输入文件到共享内存区，另一次从共享内存区到输出文件。实际上，进程之间在共享内存时，并不总是读写少量数据后就解除映射，有新的通信时，再重新建立共享内存区域。而是保持共享区域，直到通信完毕为止，这样，数据内容一直保存在共享内存中，并没有写回文件。共享内存中的内容往往是在解除映射时才写回文件的。因此，采用共享内存的通信方式效率是非常高的。</p>
+<p>通常使用mmap()的三种情况： <strong>提高I/O效率、匿名内存映射、共享内存进程通信 。</strong></p>
+<p>用户空间mmap()函数<code>void *mmap(void *start, size_t length, int prot, int flags,int fd, off_t offset)</code>，下面就其参数解释如下：</p>
+<ul>
+<li>start：用户进程中要映射的用户空间的起始地址，通常为NULL（由内核来指定）</li>
+<li>length：要映射的内存区域的大小</li>
+<li>prot：期望的内存保护标志</li>
+<li>flags：指定映射对象的类型</li>
+<li>fd：文件描述符（由open函数返回）</li>
+<li>offset：设置在内核空间中已经分配好的的内存区域中的偏移，例如文件的偏移量，大小为PAGE_SIZE的整数倍</li>
+<li>返回值：mmap()返回被映射区的指针，该指针就是需要映射的内核空间在用户空间的虚拟地址</li>
+</ul>
+<p><img src="/img/linux_sys_call_mmap.png" srcset="/img/loading.gif" alt="mmap"></p>
+<p>UNIX访问文件的传统方法是用open打开它们, 如果有多个进程访问同一个文件, 则每一个进程在自己的地址空间都包含有该文件的副本，这不必要地浪费了存储空间。 两个进程同时读一个文件的同一页时。 系统要将该页从磁盘读到高速缓冲区中, 每个进程再执行一个存储器内的复制操作将数据从高速缓冲区读到自己的地址空间。</p>
+<p>现在考虑另一种处理方法共享存储映射: 进程A和进程B都将该页映射到自己的地址空间, 当进程A第一次访问该页中的数据时, 它生成一个缺页中断. 内核此时读入这一页到内存并更新页表使之指向它.以后, 当进程B访问同一页面而出现缺页中断时, 该页已经在内存, 内核只需要将进程B的页表登记项指向次页即可.</p>
+<ul>
+<li>孤儿进程</li>
+</ul>
+<p>父进程在子进程之前退出 必须有机制保证子进程能找到一个新的父亲 否则成为孤儿的进程就会在 退出时永远处于僵死状态 白白耗费内存</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>mmap系统调用的最终目的是将设备或文件映射到用户进程的虚拟地址空间，实现用户进程对文件的直接读写，这个任务可以分为以下三步:</p>
+<ul>
+<li><p>在用户虚拟地址空间中寻找空闲的满足要求的一段连续的虚拟地址空间,为映射做准备(由内核mmap系统调用完成)<br>假如vm_area_struct描述的是一个文件映射的虚存空间，成员vm_file便指向被映射的文件的file结构，vm_pgoff是该虚存空间起始地址在vm_file文件里面的文件偏移，单位为物理页面。mmap系统调用所完成的工作就是准备这样一段虚存空间,并建立vm_area_struct结构体,将其传给具体的设备驱动程序.</p>
+</li>
+<li><p>建立虚拟地址空间和文件或设备的物理地址之间的映射(设备驱动完成)<br>建立文件映射的第二步就是建立虚拟地址和具体的物理地址之间的映射，这是通过修改进程页表来实现的。mmap方法是file_opeartions结构的成员:int (*mmap)(struct file *,struct vm_area_struct *);</p>
+<ul>
+<li><p>linux有2个方法建立页表:</p>
+<p>  使用remap_pfn_range一次建立所有页表。int remap_pfn_range(struct vm_area_struct <em>vma, unsigned long virt_addr, unsigned long pfn, unsigned long size, pgprot_t prot)。<br>  使用nopage VMA方法每次建立一个页表项。 struct page *(</em>nopage)(struct vm_area_struct *vma, unsigned long address, int *type);<br>  使用方面的限制：remap_pfn_range不能映射常规内存，只存取保留页和在物理内存顶之上的物理地址。因为保留页和在物理内存顶之上的物理地址内存管理系统的各个子模块管理不到。640 KB 和 1MB 是保留页可能映射，设备I/O内存也可以映射。如果想把kmalloc()申请的内存映射到用户空间，则可以通过mem_map_reserve()把相应的内存设置为保留后就可以。</p>
+</li>
+</ul>
+</li>
+<li><p>当实际访问新映射的页面时的操作(由缺页中断完成)<br>page cache及swap cache中页面的区分：一个被访问文件的物理页面都驻留在page cache或swap cache中，一个页面的所有信息由struct page来描述。struct page中有一个域为指针mapping ，它指向一个struct address_space类型结构。page cache或swap cache中的所有页面就是根据address_space结构以及一个偏移量来区分的。<br>文件与 address_space结构的对应：一个具体的文件在打开后，内核会在内存中为之建立一个struct inode结构，其中的i_mapping域指向一个address_space结构。这样，一个文件就对应一个address_space结构，一个 address_space与一个偏移量能够确定一个page cache 或swap cache中的一个页面。因此，当要寻址某个数据时，很容易根据给定的文件及数据在文件内的偏移量而找到相应的页面。<br>进程调用mmap()时，只是在进程空间内新增了一块相应大小的缓冲区，并设置了相应的访问标识，但并没有建立进程空间到物理页面的映射。因此，第一次访问该空间时，会引发一个缺页异常。<br>对于共享内存映射情况，缺页异常处理程序首先在swap cache中寻找目标页（符合address_space以及偏移量的物理页），如果找到，则直接返回地址；如果没有找到，则判断该页是否在交换区 (swap area)，如果在，则执行一个换入操作；如果上述两种情况都不满足，处理程序将分配新的物理页面，并把它插入到page cache中。进程最终将更新进程页表。 注：对于映射普通文件情况（非共享映射），缺页异常处理程序首先会在page cache中根据address_space以及数据偏移量寻找相应的页面。如果没有找到，则说明文件数据还没有读入内存，处理程序会从磁盘读入相应的页面，并返回相应地址，同时，进程页表也会更新.<br>所有进程在映射同一个共享内存区域时，情况都一样，在建立线性地址与物理地址之间的映射之后，不论进程各自的返回地址如何，实际访问的必然是同一个共享内存区域对应的物理页面。</p>
+</li>
+</ul>
+<h3 id="关于PageCache和SwapCache"><a href="#关于PageCache和SwapCache" class="headerlink" title="关于PageCache和SwapCache"></a>关于PageCache和SwapCache</h3><p>可以参见<a href="http://140.120.7.21/LinuxRef/mmLinux/VmOutline/pagecache.html" target="_blank" rel="noopener">这篇文章</a></p>
+<p>each page of an executable image or mmap()ed file is associated with a per-inode cache, allowing the disk file to be used as backing storage for the page. Finally, anonymous pages (those without a disk file to serve as backing storage - pages of malloc()’d memory, for example) are assigned an entry in the system swapfile, and those pages are maintained in the swap cache.</p>
+<p>Note that anonymous pages don’t get added to the swap cache - and don’t have swap space reserved - until the first time they are evicted from a process’s memory map, whereas pages mapped from files begin life in the page cache. Thus, the character of the swap cache is different than that of the page cache, and it makes sense to make the distinction.</p>
+<p>概括性的讲</p>
+<p>swap cache主要是存放那些无根（就是说没有文件系统中的某个文件和其<br>对应）的page，例如你用malloc分配出来的。<br>它对应的file device就是swapfile。<br>它和page cache的区别在于，当文件从file system上读取出来的时候，<br>它的内容就会同时读入page cache中。但是当你用malloc分配内存的<br>时候，并不马上放到swap cache中，而是在进程中不再使用该内存的<br>时候它才被读入swap cache中。 –<a href="https://blog.csdn.net/wz125/article/details/1680903" target="_blank" rel="noopener">blog</a></p>
+<h2 id="信号"><a href="#信号" class="headerlink" title="信号"></a>信号</h2><p>关于kill 与 kill -9</p>
+<pre><code>Both Kill and Kill -9 are used to kill a process . But the difference is seen in how the process which  received the Kill or Kill -9 behaves.
+
+Kill will generate a SIGTERM signal asking a process to kill itself gracefully i.e , free memory or take care of other child processes. Killing a process using kill will not have any side effects like unrelased memory because it was gracefully killed.
+
+Kill -9 works similarly but it doesn&#39;t wait for the program to gracefully die. Kill -9 generates a SIGKILL  signal which won&#39;t check the state of the process and kills the process immediately.
+
+The major difference is SIGTERM(generated by Kill) can  be ignored if the process is still to reach safe state(clear memory or similar activity) and the process may not be killed.Process cannot ignore the SIGKILL (generated by Kill -9) and will be killed immediately irrespective of the state they are in(this may some time cause some issues but the process is killed for sure).</code></pre><p>以上内容来自来自<a href="https://www.quora.com/What-is-the-difference-between-Kill-and-Kill-9-command-in-Unix" target="_blank" rel="noopener">quora</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E4%BB%BB%E5%8A%A1/">任务</a>
+                    
+                      <a class="hover-with-bg" href="/tags/OS/">OS</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "进程与线程&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

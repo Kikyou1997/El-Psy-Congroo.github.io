@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>RocketMq 消息消费 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Monday, January 20th 2020, 8:01 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    3k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      10 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="RocketMQ消息消费"><a href="#RocketMQ消息消费" class="headerlink" title="RocketMQ消息消费"></a>RocketMQ消息消费</h1><p>主要问题:</p>
+<ol>
+<li>消息队列负载均衡</li>
+<li>消息消费模式</li>
+<li>消息拉取方式</li>
+<li>消息进度反馈</li>
+<li>消息过滤</li>
+<li>顺序消息</li>
+</ol>
+<p>消息负载遵循这样一个思想: <strong>一个消息队列同一时间只允许被一个消费者消费 一个消费者可以消费多个消息队列</strong> RocketMQ 支持<strong>局部</strong>顺序消息消费 不支持消息全局顺序消费 如果要实现某一主题的全局顺序消息消费 可以将该主题的队列数设置为1 但这样牺牲了高可用性</p>
+<p>基本流程:</p>
+<ol>
+<li>消息队列负载</li>
+<li>消息拉取</li>
+<li>消息消费</li>
+<li>消息消费进度存储</li>
+</ol>
+<h2 id="消息费者启动流程"><a href="#消息费者启动流程" class="headerlink" title="消息费者启动流程"></a>消息费者启动流程</h2><p>参见<code>DefaultMQPushConsumerImpl::start</code>方法</p>
+<ol>
+<li>构建主题订阅信息<code>SubscriptionData</code>并加入到RebalanceImpl的订阅消息中</li>
+<li>初始化<code>MQCLientInstance</code>,<code>RebalanceImpl</code>等</li>
+<li>初始化消息进度 <strong>如果是集群消费 则消息进度保存在Broker上 如果是广播消费 则消息消费进度保存在消费端</strong></li>
+<li>根据是否顺序消费 创建消费端消费线程服务</li>
+<li>向MQClientInstance注册消费者</li>
+</ol>
+<h2 id="消息拉取"><a href="#消息拉取" class="headerlink" title="消息拉取"></a>消息拉取</h2><ul>
+<li><p>ProcessQueue</p>
+<p>  其是MessageQueue在消费端的重现 快照 PullMessageService从消息服务器默认每次拉取32条消息 按照消息队列偏移量顺序存放在ProcessQueue中 之后<code>PullMessageService</code>将其提交到消费者线程池中 消息消费成功后从<code>ProcessQueue</code>中移除</p>
+</li>
+</ul>
+<h3 id="消息拉取基本流程"><a href="#消息拉取基本流程" class="headerlink" title="消息拉取基本流程"></a>消息拉取基本流程</h3><ol>
+<li>消息拉取客户端消息 拉取请求封装</li>
+<li>消息服务器查找并返回消息 从远端服务器拉去消息后将消息存入ProcessQueue消息队列中</li>
+<li>消息拉取客户端处理返回的消息 由<code>ConsumeMessageService::submitConsumeRequest</code>方法进行消息消费 使用线程池消费消息 实现了消息拉取和消息消费的解耦</li>
+</ol>
+<p>基本流程可参见<code>DefaultMQPushConsumerImpl::pullMessage</code>方法 实现过于复杂 光这个方法本身就有两百多行。。。而<code>PullMessageProcessor::processRequest</code>一个方法近四百行(虽说这个方法是Broker端调用的吧)。。。看不下去 就搁一张技术内幕里的图得了。。。</p>
+<p><img src="/img/rmq_pull_message_mechanism.png" srcset="/img/loading.gif" alt="rmq_pull_msg_mechanism"></p>
+<h3 id="消息拉取长轮询机制分析"><a href="#消息拉取长轮询机制分析" class="headerlink" title="消息拉取长轮询机制分析"></a>消息拉取长轮询机制分析</h3><p>RocketMQ并没有真正实现推模式 其<strong>推模式是循环向消息服务端发送消息拉取请求</strong> 在不启用长轮询机制时 如果消息消费者向rocketmq发送消息拉取时 消息并未到达消费队列的话 服务端(也就是Broker)等待<code>shortPollingTimeMills</code>(众所周知就像本人的笔记一样 rocketmq项目中错误单词百出)再去判断消息是否已经到达消息队列 如果消息未到达则提示消息拉取客户端<code>PULL_NOT_FOUND</code>(消息不存在) 如果开启长轮询模式 则rocketmq会每隔5s轮询检查一次消息是否可达 同时一有新消息到达后立马通知挂起线程再次验证新消息是否是自己感兴趣的消息 如果是则从<code>commitlog</code>中提取消息返回给消息拉取客户端 否则直到挂起超时(push模式默认15s pull模式默认20s 封装在消息拉取时的请求参数中)</p>
+<p>通过在broker的配置文件中设置<code>longPollingEnable</code>为<code>true</code>来开启长轮询</p>
+<h2 id="消息队列负载与重分布机制"><a href="#消息队列负载与重分布机制" class="headerlink" title="消息队列负载与重分布机制"></a>消息队列负载与重分布机制</h2><p>两个问题:</p>
+<ul>
+<li><p><code>PullRequest</code>对象在什么时候创建并加入到<code>pullRequestQueue</code>中以便唤醒<code>PullMessageService</code>线程</p>
+<p>  RebalanceService线程每隔20s对消费者订阅的主题进行一次队列重新分配 每一次分配都会获得主题的所有队列 从Broker服务器实时查询当前指定主题指定消费组内消费者列表 对<strong>新分配的消息队列</strong>会创建对应的PullRequest对象  <strong>在一个JVM进程中 同一个消费组同一个消费队列只会存在一个PullRequest对象</strong>(我知道了 大概就是这玩意创建完之后搁队列里 取出来之后调用<code>DefaultMQPushConsumerImpl::pullMessage</code>拉取成功之后在回调方法里会再把这玩意搁<code>PullMessageService</code>的那个队列里…真是奇妙深刻)</p>
+</li>
+<li><p>集群内多个消费者是如何负载消息下的多个消费队列 如果有新的消费者加入时 消息队列又会如何重新分布</p>
+<p>  每次进行队列重新负载时 会从Broker查询出当前消费组内所有消费者 并对消息队列消费者列表进行排序 这样下新加入的消费者就会在队列重新分布时分配到消费队列从而消费消息</p>
+</li>
+</ul>
+<p><code>RebalanceService</code>线程负责实现mq的消息队列重分布 每一个MQClientInstance都持有一个该Service的实现 随其启动而启动 该服务线程每20s执行一次<code>MQClientInstance::doRebalance</code>方法 instance遍历已注册的消费者对消费者执行<code>doRebalance</code>方法</p>
+<pre><code class="java">    public void doRebalance() {
+        for (Map.Entry&lt;String, MQConsumerInner&gt; entry : this.consumerTable.entrySet()) {
+            MQConsumerInner impl = entry.getValue();
+            if (impl != null) {
+                try {
+                    impl.doRebalance();
+                } catch (Throwable e) {
+                    log.error(&quot;doRebalance exception&quot;, e);
+                }
+            }
+        }
+    }</code></pre>
+<p>每个<code>DefaultPushConsumerImpl</code>都持有一个<code>rebalanceImpl</code>对象 该方法主要是遍历订阅信息对每个主题的队列进行重新负载</p>
+<p>关于其如何针对特定topic进行消息队列重新负载见<code>RebalanceImpl:rebalanceByTopic</code>:</p>
+<ul>
+<li>以集群模式为例</li>
+</ul>
+<ol>
+<li><p>从主题订阅信息缓存表中获取主题的队列信息 从Broker中获取当前消费组内所有消费者客户端id(因为<code>MQClientInstance</code>启动时会向所有的Broekr发送心跳包 其中包括了自己的消费者信息 所以Broker中会有关于消费组的信息 至于从哪个Broker中获取则随机选择)</p>
+<pre><code class="java">    public String findBrokerAddrByTopic(final String topic) {
+     TopicRouteData topicRouteData = this.topicRouteTable.get(topic);
+     if (topicRouteData != null) {
+         List&lt;BrokerData&gt; brokers = topicRouteData.getBrokerDatas();
+         if (!brokers.isEmpty()) {
+             int index = random.nextInt(brokers.size());
+             BrokerData bd = brokers.get(index % brokers.size());
+             return bd.selectBrokerAddr();
+         }
+     }
+
+     return null;
+ }</code></pre>
+</li>
+<li><p>对cid mqAll排序 确保同一个消费组内看到的视图保持一致 采用指定算法进行分配 RocketMQ默认提供6种分配算法<br><img src="/img/rmq_cmq_allocate_alg.png" srcset="/img/loading.gif" alt="alg"><br>通常情况下 使用平均轮询分配和平均分配即可</p>
+</li>
+</ol>
+<p>尤其需要注意的是<strong>同一个消息队列只会分配给一个消费者 如果消费者个数大于消息队列数量 则有些消费者可能会无法消费消息</strong></p>
+<ol start="3">
+<li><p>对比消息队列是否发生变化 更新当前consumer被分配到的consumequeue(<code>RebalanceImpl.processQueueTable</code>字段) 见<code>RebalanceImpl::updateProcessQueueTableInRebalance</code> 其主要思路是遍历当前负载队列集合 如果队列不在新分配集合中 需要将该队列停止消费 并保存消费进度; 遍历已分配队列 如果队列不在<code>RebalanceImpl.processQueueTable</code>中 则需要创建该对列拉去任务<code>PullRequest</code> 然后添加到<code>PullMessageService</code>线程的<code>pullRequestQueue</code>中 这样<code>PullMessageService</code>才会继续拉取任务</p>
+</li>
+<li><p>遍历本次负载分配到的队列集合 如果<code>processQueueTable</code>没有包含该消息队列 表明这是本次新增加的消息队列 首先从内存中剔除该消息队列的消息进度 然后从磁盘中读取该消息队列的消费进度(再强调一下对于广播型的消费 其消费进度保存在本地 而集群消费的consumerqueue消费进度保存在broker上此时从磁盘上读取消息队列的消费进度 也是从broker服务器的磁盘上读取) 创建PullRequest对象 对于消费进度的问题可以在创建消费者时通过<code>DefaultMQPushConsumer::setConsumeFromWhere</code>方法设置 有3种策略</p>
+<ol>
+<li><p>从队列最新偏移量开始消费</p>
+</li>
+<li><p>从头开始消费</p>
+</li>
+<li><p>从消费者的时间戳对应的消费进度开始消费</p>
+<p>但是这些消费策略只有在从磁盘中读取消费进度返回-1时才会生效(?更加迷惑?) 这是指的是<code>RebalancePushImpl::computePullFromWhere</code>方法的实现中 无论我们设置了哪种策略 都会先尝试从broker消息服务器拉取 consumequeue的消费进度 失败再的话再按指定策略进行设置 具体可参看该方法的代码实现</p>
+</li>
+</ol>
+</li>
+<li><p>将<code>PullRequest</code>加入到<code>PullMessageService</code>中 以便唤醒该线程</p>
+</li>
+</ol>
+<p><img src="/img/rmq_cluster_consume_progress_princinple.png" srcset="/img/loading.gif" alt="rmq_cluster"></p>
+<h2 id="消息消费"><a href="#消息消费" class="headerlink" title="消息消费"></a>消息消费</h2><h3 id="消息进度设计"><a href="#消息进度设计" class="headerlink" title="消息进度设计"></a>消息进度设计</h3><p>关于并发消费消息进度的更新问题</p>
+<p>消费者线程池每处理完一个消息消费任务时(ConsumeRequest) 会从ProcessQueue中移除本批消费的的消息 <strong>并返回ProcessQueue中的最小偏移量</strong>  消息消费的推进取决于ProcessQueue中偏移量最小的消息消费速度 参见<code>ProcessQueue::removeMessage</code>方法 其在<code>ConsumeMessageConcurrentlyService::processConsumeResult</code>中被调用 用该偏移量更新消息队列消费进度</p>
+<pre><code class="java">    public long removeMessage(final List&lt;MessageExt&gt; msgs) {
+        long result = -1;
+        final long now = System.currentTimeMillis();
+        try {
+            this.lockTreeMap.writeLock().lockInterruptibly();
+            this.lastConsumeTimestamp = now;
+            try {
+                if (!msgTreeMap.isEmpty()) {
+                    result = this.queueOffsetMax + 1;
+                    int removedCnt = 0;
+                    for (MessageExt msg : msgs) {
+                        MessageExt prev = msgTreeMap.remove(msg.getQueueOffset());
+                        if (prev != null) {
+                            removedCnt--;
+                            msgSize.addAndGet(0 - msg.getBody().length);
+                        }
+                    }
+                    msgCount.addAndGet(removedCnt);
+
+                    if (!msgTreeMap.isEmpty()) {
+                        result = msgTreeMap.firstKey();
+                    }
+                }
+            } finally {
+                this.lockTreeMap.writeLock().unlock();
+            }
+        } catch (Throwable t) {
+            log.error(&quot;removeMessage exception&quot;, t);
+        }
+
+        return result;
+    }</code></pre>
+<p>为了避免消费消息偏移量最小的消息时发生死锁 导致一致无法被消费 进而导致 消息进度无法向前推进 RocketMq 引入了一种消息拉取流控措施 <code>DefaultMQPushConsumer.consumeConcurrentlyMaxSpan</code> 一旦ProcessQueue中的最大消息偏移与最小消息偏移量超过该值 将触发流控 延迟该消息队列的消息拉取</p>
+<p>触发消息消费进度更新的另一个是在消息负载时 如果消息消费队列被分配给其他消费者时 此时会将ProcessQueue状态设置为dropped 持久化该消息队列的消费进度 并从内存中移除</p>
+<h2 id="顺序消息"><a href="#顺序消息" class="headerlink" title="顺序消息"></a>顺序消息</h2><p>顺序消息包含两种类型:</p>
+<ul>
+<li><p>分区顺序(RocketMQ所支持的)：一个Partition内所有的消息按照先进先出的顺序进行发布和消费</p>
+</li>
+<li><p>全局顺序：一个Topic内所有的消息按照先进先出的顺序进行发布和消费</p>
+</li>
+</ul>
+<p>在MQ的模型中，顺序需要由3个阶段去保障：</p>
+<ul>
+<li><p>消息被发送时保持顺序</p>
+</li>
+<li><p>消息被存储时保持和发送的顺序一致</p>
+</li>
+<li><p>消息被消费时保持和存储的顺序一致</p>
+</li>
+</ul>
+<p>发送时保持顺序意味着对于有顺序要求的消息，用户应该在同一个线程中采用同步的方式发送。存储保持和发送的顺序一致则要求在同一线程中被发送出来的消息A和B，存储时在空间上A一定在B之前。而消费保持和存储一致则要求消息A、B到达Consumer之后必须按照先A后B的顺序被处理。</p>
+<p><img src="/img/rmq_order.png" srcset="/img/loading.gif" alt="rmqorder"></p>
+<p>推荐阅读<a href="https://www.cnblogs.com/hzmark/p/orderly_message.html" target="_blank" rel="noopener">koko</a></p>
+<p>Rocketmq首先通过<code>RebalanceService</code>线程实现消息队列的负载 集群模式下同一个消费组内的消费者共同承担其订阅主题下消息队列的消费 <strong>同一个消息消费队列在同一时刻只会被消费组内一个消费者消费 一个消费者同一个时刻可以分配多个消费队列</strong></p>
+<p>rmq支持局部消息顺序消费 可以确保同一个消息消费队列中的消息被顺序消费 如果需要做到全局顺序消费则可以将主题配置成<strong>一个队列</strong></p>
+<p>调用<code>RebalanceImpl::lock</code>的向Broker发送锁定消息队列的请求 -&gt; 锁定成功后 设置processqueue的locked状态为true -&gt; <code>ConsumeMessageOrderlyService</code>维护了一个<code>MessageQueueLock</code>该lock用ConcurrentHashMap 为每个MessageQueue设置了一个object对象锁 -&gt; 消费时 需要获取指定消费队列的lock 即同时只能有消费者的一个消费线程去消费指定消息队列的消息 </p>
+<p>上述也体现了顺序消息与并发消息的最重要的区别 顺序消息消费是指消费者内的线程池内的线程只能串行的消费 以及必须成功锁定消息消费队列 在broker端会存储消息消费队列的锁占用情况</p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/MessageQueue/">MessageQueue</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "RocketMq 消息消费&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

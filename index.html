@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 100vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+          </div>
+
+          
+            <div class="scroll-down-bar">
+              <i class="fas fa-angle-down scroll-down-arrow"></i>
+            </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-md">
+        <div class="py-5 z-depth-3" id="board"
+          style=margin-top:0>
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/04/04/DDIA%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/ddia/">
+        <p class="h4 index-header">DDIA读书笔记</p>
+      </a>
+
+      <a href="/2020/04/04/DDIA%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/ddia/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">DDIA读书笔记TO-DO:
+
+lamport timestamp 与 vector clock的对比
+读关于dynamo的论文
+读lamport关于分布式系统中的时钟与事件顺序原文
+
+数据检索
+索引:
+  基于原始数据派生而来的额外数据结构 适当的索引可以加速读取查询 但由于每次写数据时 需要更新索引 因此任何类型的索引都会降低写的速度
+
+
+数据结构
+哈希索引
+
+SortedStringTable(Log Structured Merge Tree)
+  基于这种实现的存储引擎通常工作方式如下:
+
+当写入时，先将要写入的数据添加到内存中的平衡树结构中(如AVL或者红黑树)，这块内存区域也被成</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-04-04&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>&nbsp;
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a>&nbsp;
+          &nbsp;
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/02/27/Netty%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A02/index/">
+        <p class="h4 index-header">Netty源码学习2</p>
+      </a>
+
+      <a href="/2020/02/27/Netty%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A02/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">Netty 源码学习2最近在写一个基于netty实现的程序的时候碰到了一些问题 暂时想不到解决方法 故再次学习一下netty源码 
+Netty中的Reactor
+Netty中的NioEventLoop即是对多线程Reactor模型中的Reactor线程的实现 其大致分为3个步骤
+
+轮询出IO事件
+处理IO事件
+处理任务队列
+
+下面主要分析NioEventLoop::run(4.1.45Final版本)方法 
+ @Override
+    protected void run() {
+        int selectCnt = 0;
+        for (;;) {
+          </div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-02-27&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/Netty/">Netty</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/01/20/RocketMQ%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9/index/">
+        <p class="h4 index-header">RocketMq 消息消费</p>
+      </a>
+
+      <a href="/2020/01/20/RocketMQ%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">RocketMQ消息消费主要问题:
+
+消息队列负载均衡
+消息消费模式
+消息拉取方式
+消息进度反馈
+消息过滤
+顺序消息
+
+消息负载遵循这样一个思想: 一个消息队列同一时间只允许被一个消费者消费 一个消费者可以消费多个消息队列 RocketMQ 支持局部顺序消息消费 不支持消息全局顺序消费 如果要实现某一主题的全局顺序消息消费 可以将该主题的队列数设置为1 但这样牺牲了高可用性
+基本流程:
+
+消息队列负载
+消息拉取
+消息消费
+消息消费进度存储
+
+消息费者启动流程参见DefaultMQPushConsumerImpl::start方法
+
+构建主题订阅信息SubscriptionData并加入到Reb</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-01-20&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/MessageQueue/">MessageQueue</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/01/16/%E5%86%85%E5%AD%98%E9%94%81%E5%AE%9A/index/">
+        <p class="h4 index-header">内存锁定</p>
+      </a>
+
+      <a href="/2020/01/16/%E5%86%85%E5%AD%98%E9%94%81%E5%AE%9A/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">4  Memory Locking本文来自该大学网站上的一篇文章
+Memory management facilities ensure that processes have effective and equitable access to memory resources. The operating system maps and controls the relationship between physical memory and the virtual address space of a process. These activities are, for the most </div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-01-16&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/%E4%BB%BB%E5%8A%A1/">任务</a>&nbsp;
+          
+            <a href="/tags/syscall/">syscall</a>&nbsp;
+          
+            <a href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/01/11/Netty%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index/">
+        <p class="h4 index-header">Netty源码学习</p>
+      </a>
+
+      <a href="/2020/01/11/Netty%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">Netty源码学习模型
+
+
+Rector多线程模型:
+特点：
+
+有专门一个reactor线程用于监听服务端ServerSocketChannel，接收客户端的TCP连接请求；
+网络IO的读/写操作等由一个worker reactor线程池负责，由线程池中的NIO线程负责监听SocketChannel事件，进行消息的读取、解码、编码和发送。
+一个NIO线程可以同时处理N条链路，但是一个链路只注册在一个NIO线程上处理，防止发生并发操作问题。
+
+Netty采取了事件驱动模型设计 其具有如下4个基本组件
+
+事件队列（event queue） ：接收事件的入口，存储待处理事件
+分发器（event me</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-01-11&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/Netty/">Netty</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/01/04/RocketMQ%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index/">
+        <p class="h4 index-header">RocketMq 技术内幕读书笔记</p>
+      </a>
+
+      <a href="/2020/01/04/RocketMQ%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">RocketMq 技术内幕读书笔记NameServer路由
+NameServer存储了路由表及相关的元数据
+NameServer相关的两个比较重要的类:
+
+org.apache.rocketmq.namesrv.routeinfo.RouteInfoManager存储/管理若干路由数据
+org.apache.rocketmq.namesrv.NamesrvController
+
+RouteInfoManager所存储的信息包括
+private final HashMap&lt;String/* topic */, List&lt;QueueData&gt;&gt; topicQueueTabl</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-01-04&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/MessageQueue/">MessageQueue</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2019/08/10/Redis%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/index/">
+        <p class="h4 index-header">Redis命令执行周期</p>
+      </a>
+
+      <a href="/2019/08/10/Redis%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">Redis命令执行周期Redis是典型的事件驱动程序 事件处理显得更为重要 Redis将事件分为两大类:
+
+文件事件 socket的读写事件
+时间事件 用于处理一些需要周期性执行的定时任务
+
+
+注意双向链表已不再使用 且zset有序列表有时还会用到hash类型 将hash和skiplist结合使用 这样可以将查找特定元素的操作的时间开销缩小到O(1) 而zrange zrank等命令的复杂度仍为O(logN) 也就是结合了两者的优点 略微牺牲了一些空间 达到更好的综合性能
+server.h中的zset结构定义如下
+typedef struct zset {
+    dict *dict;
+  </div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-08-10&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/C/">C</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/Redis/">Redis</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2019/08/07/Redis%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%AC%94%E8%AE%B0/index/">
+        <p class="h4 index-header">Redis源码解析笔记</p>
+      </a>
+
+      <a href="/2019/08/07/Redis%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%AC%94%E8%AE%B0/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">Redis源码解析笔记学习redis源码顺便学下C
+数据类型与结构简单动态字符串(SDS, Simple Dynamic String)结构体基本定义
+struct __attribute__ ((__packed__)) sdshdr64 {
+    uint64_t len; /* used */
+    uint64_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+__</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-08-07&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/">源码</a>&nbsp;
+          
+            <a href="/categories/%E6%BA%90%E7%A0%81/C/">C</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/Redis/">Redis</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2019/04/08/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index/">
+        <p class="h4 index-header">内存管理</p>
+      </a>
+
+      <a href="/2019/04/08/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">内存管理虚拟内存虚拟内存的作用
+将主存作为一个存储在磁盘上的地址空间的高速缓存 主存中只保留活动区域 并根据需要在磁盘和主存之间来回传送数据(内存页的换入换出)
+为每个进程提供了一个一致的地址空间 从而简化了内存管理
+保护了每个进程的地址空间不被其它进程破坏
+
+任意时刻 虚拟页面的集合分为3个不相交的子集
+
+未分配的 VM系统未分配的页
+缓存的 当前已缓存在物理内存中的已分配页
+未缓存的 未缓存在物理内存中的已分配页
+
+
+地址翻译CPU的一个控制寄存器–页表基址寄存器(Page Table Base Register) 指向当前页表 n位的虚拟地址包括两个部分 一个P位的虚拟页面偏移(Virt</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-04-08&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>&nbsp;
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2019/03/27/%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index/">
+        <p class="h4 index-header">进程与线程</p>
+      </a>
+
+      <a href="/2019/03/27/%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">进程与线程进程正在运行的程序, 一种控制流集合, 集合中至少包括一条执行流, 执行流之间相互独立, 它们共享进程的所有资源
+进程= 线程 + 资源
+进程提供给应用程序的抽象:
+
+一个独立的逻辑控制流(好像程序独占的使用处理器一样)
+一个私有独立的地址空间(好像程序独立的使用内存一样)
+
+虚拟地址空间典型的linux进程虚拟地址空间布局
+
+
+虚拟内存描述符
+
+linux中使用mm_struct来描述进程的虚拟内存空间 该结构体定义在include/linux/mm_types中 下面展示的是简化版本 可以看到其中定义了包括内存区域链表 VMA形成的红黑树 spinlock_t page_tabl</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-03-27&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>&nbsp;
+          &nbsp;
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/%E4%BB%BB%E5%8A%A1/">任务</a>&nbsp;
+          
+            <a href="/tags/OS/">OS</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "El psy congroo&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

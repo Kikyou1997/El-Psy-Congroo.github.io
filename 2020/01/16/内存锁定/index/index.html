@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>内存锁定 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Thursday, January 16th 2020, 3:30 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    2k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      12 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="4-Memory-Locking"><a href="#4-Memory-Locking" class="headerlink" title="4  Memory Locking"></a>4  Memory Locking</h1><p>本文来自<a href="(https://www3.physnet.uni-hamburg.de/physnet/Tru64-Unix/HTML/APS33DTE/DOCU_005.HTM">该大学网站上的一篇文章</a></p>
+<p>Memory management facilities ensure that processes have effective and equitable access to memory resources. The operating system maps and controls the relationship between physical memory and the virtual address space of a process. These activities are, for the most part, transparent to the user and controlled by the operating system. However, for many realtime applications you may need to make more efficient use of system resources by explicitly controlling virtual memory usage.</p>
+<p>This chapter includes the following sections:</p>
+<p>Memory Management, Section 4.1</p>
+<p>Memory-Locking and Unlocking Functions, Section 4.2</p>
+<p>Memory locking is one way to ensure that a process stays in main memory and is exempt from paging. In a realtime environment, a system must be able to guarantee that it will lock a process in memory to reduce latency for data access, instruction fetches, buffer passing between processes, and so forth. Locking a process’s address space in memory helps ensure that the application’s response time satisfies realtime requirements. As a general rule, time-critical processes should be locked into memory.</p>
+<h2 id="4-1-Memory-Management"><a href="#4-1-Memory-Management" class="headerlink" title="4.1    Memory Management"></a>4.1    Memory Management</h2><p>In a multiprogramming environment, it is essential for the operating system to share available memory effectively among processes. Memory management policies are directly related to the amount of memory required to execute those processes. Memory management algorithms are designed to optimize the number of runnable processes in primary memory while avoiding conflicts that adversely affect system performance. If a process is to remain in memory, the kernel must allocate adequate units of memory. If only part of a process needs to be in primary memory at any given time, then memory management can work together with the scheduler to make optimal use of resources.</p>
+<p>Virtual address space is divided into fixed-sized units, called pages. Each process usually occupies a number of pages, which are independently moved in and out of primary memory as the process executes. Normally, a subset of a process’s pages resides in primary memory when the process is executing.</p>
+<p>Since the amount of primary memory available is finite, paging is often done at the expense of some pages; to move pages in, others must be moved out. If the page that is going to be replaced is modified during execution, that page is written to a file area. That page is brought back into primary memory as needed and execution is delayed while the kernel retrieves the page.</p>
+<p>Paging is generally transparent to the current process. The amount of paging can be decreased by increasing the size of physical memory or by locking the pages into memory. However, if the process is very large or if pages are frequently being paged in and out, the system overhead required for paging may decrease efficiency.</p>
+<p>For realtime applications, having adequate memory is more important than for nonrealtime applications. Realtime applications must ensure that processes are locked into memory and that there is an adequate amount of memory available for both realtime processes and the system. Latency due to paging is often unacceptable for critical realtime tasks.</p>
+<h2 id="4-2-Memory-Locking-and-Unlocking-Functions"><a href="#4-2-Memory-Locking-and-Unlocking-Functions" class="headerlink" title="4.2    Memory-Locking and Unlocking Functions"></a>4.2    Memory-Locking and Unlocking Functions</h2><p>Realtime application developers should consider memory locking as a required part of program initialization. Many realtime applications remain locked for the duration of execution, but some may want to lock and unlock memory as the application runs. DIGITAL UNIX memory-locking functions let you lock the entire process at the time of the function call and throughout the life of the application, or selectively lock and unlock as needed.</p>
+<p>Memory locking applies to a process’s address space. Only the pages mapped into a process’s address space can be locked into memory. When the process exits, pages are removed from the address space and the locks are removed.</p>
+<p>Two functions, mlock and mlockall, are used to lock memory. The mlock function allows the calling process to lock a selected region of address space. The mlockall function causes all of a process’s address space to be locked. Locked memory remains locked until either the process exits or the application calls the corresponding munlock or munlockall function.</p>
+<p>Memory locks are not inherited across a fork and all memory locks associated with a process are unlocked on a call to the exec function or when the process terminates.</p>
+<p>For most realtime applications the following control flow minimizes program complexity and achieves greater determinism by locking the entire address into memory.</p>
+<p>Perform nonrealtime tasks, such as opening files or allocating memory</p>
+<p>Lock the address space of the process calling mlockall function</p>
+<p>Perform realtime tasks</p>
+<p>Release resources and exit</p>
+<p>The memory-locking functions are as follows:</p>
+<p><img src="/img/os_memory_lock.png" srcset="/img/loading.gif" alt="func"></p>
+<p>You must have superuser privileges to call the memory locking functions.</p>
+<h3 id="4-2-1-Locking-and-Unlocking-a-Specified-Region"><a href="#4-2-1-Locking-and-Unlocking-a-Specified-Region" class="headerlink" title="4.2.1    Locking and Unlocking a Specified Region"></a>4.2.1    Locking and Unlocking a Specified Region</h3><p>The mlock function locks a preallocated specified region. The address and size arguments of the mlock function determine the boundaries of the preallocated region. On a successful call to mlock, the specified region becomes locked. Memory is locked by the system according to system-defined pages. If the address and size arguments specify an area smaller than a page, the kernel rounds up the amount of locked memory to the next page. The mlock function locks all pages containing any part of the requested range, which can result in locked addresses beyond the requested range.</p>
+<p>Repeated calls to mlock could request more physical memory than is available; in such cases, subsequent processes must wait for locked memory to become available. Realtime applications often cannot tolerate the latency introduced when a process must wait for lockable space to become available. Preallocating and locking regions is recommended for realtime applications.</p>
+<p>If the process requests more locked memory than will ever be available in the system, an error is returned.</p>
+<p>Figure 4-1 illustrates memory allocation before and after a call to the mlock function. Prior to the call to the mlock function, buffer space in the data area is not locked and is therefore subject to paging. After the call to the mlock function the buffer space cannot be paged out of memory.</p>
+<ul>
+<li><strong>Figure 4-1:  Memory Allocation with mlock</strong></li>
+</ul>
+<p><img src="/img/memory_alloc_with_mlock.gif" srcset="/img/loading.gif" alt="mawml"></p>
+<p>The mlock function locks all pages defined by the range addr to addr+len-1 (inclusive). The area locked is the same as if the len argument were rounded up to a multiple of the next page size before decrementing by 1. The address must be on a page boundary and all pages mapped by the specified range are locked. Therefore, you must determine how far the return address is from a page boundary and align it before making a call to the mlock function.</p>
+<p>Use the sysconf(_SC_PAGE_SIZE) function to determine the page size. The size of a page can vary from system to system. To ensure portability, call the sysconf function as part of your application or profile when writing applications that use the memory-locking functions. The sys/mman.h header file defines the maximum amount of memory that can be locked. Use the getrlimit function to determine the amount of total memory.</p>
+<p>Exercise caution when you lock memory; if your processes require a large amount of memory and your application locks memory as it executes, your application may take resources away from other processes. In addition, you could attempt to lock more virtual pages than can be contained in physical memory.</p>
+<p>Locked space is automatically unlocked when the process exits, but you can also explicitly unlock space. The munlock function unlocks the specified address range regardless of the number of times the mlock function was called. In other words, you can lock address ranges over multiple calls to the mlock function, but can remove the locks with a single call to the munlock function. Space locked with a call to the mlock function must be unlocked with a corresponding call to the munlock function.</p>
+<p>Example 4-1 shows how to lock and unlock memory segments. Each user-written function determines page size, adjusts boundaries, and then either locks or unlocks the segment.</p>
+<ul>
+<li><strong>Example 4-1:  Aligning and Locking a Memory Segment</strong></li>
+</ul>
+<pre><code class="c">#include &lt;unistd.h&gt;     /* Support all standards    */
+#include &lt;sys/mman.h&gt;   /* Memory locking functions */
+
+#define DATA_SIZE 2048
+
+lock_memory(char   *addr,
+            size_t  size)
+{
+  unsigned long    page_offset, page_size;
+
+  page_size = sysconf(_SC_PAGE_SIZE);
+  page_offset = (unsigned long) addr % page_size;
+
+  addr -= page_offset;  /* Adjust addr to page boundary */
+  size += page_offset;  /* Adjust size with page_offset */
+
+  return ( mlock(addr, size) );  /* Lock the memory */
+}
+
+unlock_memory(char   *addr,
+              size_t  size)
+{
+  unsigned long    page_offset, page_size;
+
+  page_size = sysconf(_SC_PAGE_SIZE);
+  page_offset = (unsigned long) addr % page_size;
+
+  addr -= page_offset;  /* Adjust addr to page boundary */
+  size += page_offset;  /* Adjust size with page_offset */
+
+  return ( munlock(addr, size) );  /* Unlock the memory */
+}
+
+main()
+{
+  char data[DATA_SIZE];
+
+  if ( lock_memory(data, DATA_SIZE) == -1 )
+    perror(&quot;lock_memory&quot;);
+
+           /* Do work here */
+
+  if ( unlock_memory(data, DATA_SIZE) == -1 )
+    perror(&quot;unlock_memory&quot;);
+}</code></pre>
+<h3 id="4-2-2-Locking-and-Unlocking-an-Entire-Process-Space"><a href="#4-2-2-Locking-and-Unlocking-an-Entire-Process-Space" class="headerlink" title="4.2.2    Locking and Unlocking an Entire Process Space"></a>4.2.2    Locking and Unlocking an Entire Process Space</h3><p>The mlockall function locks all of the pages mapped by a process’s address space. On a successful call to mlockall, the specified process becomes locked and memory-resident. The mlockall function takes two flags, MCL_CURRENT and MCL_FUTURE, which determine whether the pages to be locked are those currently mapped, or if pages mapped in the future are to be locked. You must specify at least one flag for the mlockall function to lock pages. If you specify both flags, the address space to be locked is constructed from the logical OR of the two flags.</p>
+<p>If you specify MCL_CURRENT only, all currently mapped pages of the process’s address space are memory-resident and locked. Subsequent growth in any area of the specified region is not locked into memory. If you specify the MCL_FUTURE flag only, all future pages are locked in memory. If you specify both MCL_CURRENT and MCL_FUTURE, then the current pages are locked and subsequent growth is automatically locked into memory.</p>
+<p>Figure 4-2 shows memory allocation before and after a call to the mlockall function with both MCL_CURRENT and MCL_FUTURE flags. Prior to the call to the mlockall function, space is not locked and is therefore subject to paging. After a call to the mlockall function, which specifies the MCL_CURRENT and MCL_FUTURE flags, all memory used by the process, both currently and in the future, is locked into memory. The call to the malloc function increases the amount of memory locked for the process.</p>
+<ul>
+<li><strong>Figure 4-2:  Memory Allocation with mlockall</strong></li>
+</ul>
+<p><img src=".//img/memory_alloc_with_mlockall.gif" srcset="/img/loading.gif" alt="mawmla"></p>
+<p>The munlockall function unlocks all pages mapped by a call to the mlockall function, even if the MCL_FUTURE flag was specified on the call. The call to the munlockall function cancels the MCL_FUTURE flag. If you want additional locking later, you must call the memory-locking functions again.</p>
+<p>Example 4-2 illustrates how the mlockall function might be used to lock current and future address space.</p>
+<ul>
+<li><strong>Example 4-2:  Using the mlockall Function</strong></li>
+</ul>
+<pre><code class="c">#include &lt;unistd.h&gt;     /* Support all standards    */
+#include &lt;stdlib.h&gt;     /* malloc support           */
+#include &lt;sys/mman.h&gt;   /* Memory locking functions */
+
+#define BUFFER 2048
+
+main()
+{
+  void *p[3];  /* Array of 3 pointers to void */
+
+  p[0] = malloc(BUFFER);
+
+       /* Currently no memory is locked */
+
+  if ( mlockall(MCL_CURRENT) == -1 )
+    perror(&quot;mlockall:1&quot;);
+
+       /* All currently allocated memory is locked */
+
+  p[1] = malloc(BUFFER);
+
+       /* All memory but data pointed to by p[1] is locked */
+
+  if ( munlockall() == -1 )
+    perror(&quot;munlockall:1&quot;);
+
+       /* No memory is now locked */
+
+  if ( mlockall(MCL_FUTURE) == -1 )
+    perror(&quot;mlockall:2&quot;);
+
+       /* Only memory allocated in the future */
+       /*   will be locked */
+
+  p[2] = malloc(BUFFER);
+
+       /* Only data pointed to by data[2] is locked */
+
+  if ( mlockall(MCL_CURRENT|MCL_FUTURE) == -1 )
+    perror(&quot;mlockall:3&quot;);
+
+       /* All memory currently allocated and all memory that  */
+       /* gets allocated in the future will be locked         */
+}</code></pre>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E4%BB%BB%E5%8A%A1/">任务</a>
+                    
+                      <a class="hover-with-bg" href="/tags/syscall/">syscall</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "内存锁定&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

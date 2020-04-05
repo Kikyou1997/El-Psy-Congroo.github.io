@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>Netty源码学习2 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Thursday, February 27th 2020, 4:43 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    2.6k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      11 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="Netty-源码学习2"><a href="#Netty-源码学习2" class="headerlink" title="Netty 源码学习2"></a>Netty 源码学习2</h1><p>最近在写一个基于netty实现的程序的时候碰到了一些问题 暂时想不到解决方法 故再次学习一下netty源码 </p>
+<h2 id="Netty中的Reactor"><a href="#Netty中的Reactor" class="headerlink" title="Netty中的Reactor"></a>Netty中的Reactor</h2><p><img src="/img/Netty_NioEventloop.webp" srcset="/img/loading.gif" alt=""></p>
+<p>Netty中的<code>NioEventLoop</code>即是对多线程Reactor模型中的Reactor线程的实现 其大致分为3个步骤</p>
+<ol>
+<li>轮询出IO事件</li>
+<li>处理IO事件</li>
+<li>处理任务队列</li>
+</ol>
+<p>下面主要分析<code>NioEventLoop::run</code>(4.1.45Final版本)方法 </p>
+<pre><code class="java"> @Override
+    protected void run() {
+        int selectCnt = 0;
+        for (;;) {
+            try {
+                int strategy;
+                try {
+                    // hasTasks返回任务队列是否还有任务，若还有则calculateStrategy方法会调用NioEventLoop提供的supplier实现，即立刻selectNow，该方法返回结果是大于0的
+                    strategy = selectStrategy.calculateStrategy(selectNowSupplier, hasTasks());
+    ...</code></pre>
+<p>上面的代码主要根据<code>taskQueue</code>中是否还有任务来计算当前的<code>SelectStrategy</code> 如果有则调用<code>selectNow</code>方法 取得要处理的事件 该方法 <strong>Selects a set of keys whose corresponding channels are ready for I/O operations. It’s un-blocked</strong> 如果当前没有要处理的任务则strategy将为<code>SELECT</code> 这种策略意味着将阻塞等待I/O事件，这就需要计算合适的阻塞时间 以避免导致其他的定时任务无法按时得到执行，通Redis中处理事件循环以及计算阻塞时间的方式类似，这里也会将距定时任务中最近将要执行的事件的时间的差设置为最长阻塞时间</p>
+<p>这里的<code>taskQueue</code>定义在<code>SingleThreadEventExecutor</code>默认采用<code>LinkedBlockingQueue</code>实现</p>
+<pre><code class="java">case SelectStrategy.SELECT:
+                        long curDeadlineNanos = nextScheduledTaskDeadlineNanos();
+                        if (curDeadlineNanos == -1L) {
+                            curDeadlineNanos = NONE; // nothing on the calendar
+                        }
+                        nextWakeupNanos.set(curDeadlineNanos);
+                        try {
+                            if (!hasTasks()) {
+                                strategy = select(curDeadlineNanos);
+                            }
+                        } finally {
+                            // This update is just to help block unnecessary selector wakeups
+                            // so use of lazySet is ok (no race condition)
+                            nextWakeupNanos.lazySet(AWAKE);
+                        }</code></pre>
+<p>期间如果发生了<code>IOException</code>将重建Selector</p>
+<pre><code class="java">catch (IOException e) {
+                    // If we receive an IOException here its because the Selector is messed up. Let&#39;s rebuild
+                    // the selector and retry. https://github.com/netty/netty/issues/8566
+                    rebuildSelector0();
+                    selectCnt = 0;
+                    handleLoopException(e);
+                    continue;
+                }</code></pre>
+<p>下面的代码中的<code>selectCnt</code>是用于记录空循环次数 此值达到一个阈值（<code>selectorAutoRebuildThreshold</code>）且<code>SELECT</code>操作的阻塞时间小于设定值时 将会触发Selector重建，这是为了解决jdk中的Select返回空值引发死循环占用过多CPU资源的bug 而<code>ioRatio</code>则是服务于Netty提供的一种设定I/O所占执行时间的机制</p>
+<pre><code class="java">                selectCnt++;
+                cancelledKeys = 0;
+                needsToSelectAgain = false;
+                final int ioRatio = this.ioRatio;
+                boolean ranTasks;
+                if (ioRatio == 100) {
+                    try {
+                        if (strategy &gt; 0) {
+                            processSelectedKeys();
+                        }
+                    } finally {
+                        // Ensure we always run tasks.
+                        ranTasks = runAllTasks();
+                    }
+                } else if (strategy &gt; 0) {
+                    final long ioStartTime = System.nanoTime();
+                    try {
+                        processSelectedKeys();// 处理I/O事件
+                    } finally {
+                        // Ensure we always run tasks.
+                        final long ioTime = System.nanoTime() - ioStartTime;
+                        ranTasks = runAllTasks(ioTime * (100 - ioRatio) / ioRatio);// ioTime * (100 - ioRatio) / ioRatio 其结果刚好满足runAllTasks执行时间所占比例不超过（100-ratio）/100
+                    }
+                } else {
+                    ranTasks = runAllTasks(0); // This will run the minimum number of tasks
+                }</code></pre>
+<p><code>runAllTasks</code>在执行时若队列中并没有任务将直接返回false，如果ranTasks为false且<code>strategy</code>&gt;0 将调用<code>unexpectedSelectorWakeup</code>方法 该方法判断<code>selectCnt</code>是否已经超过阈值若是则重建Selctor 并将selectCnt置0</p>
+<p>详细的 processSelectedKey(SelectionKey k, AbstractNioChannel ch) 简单的来讲做了下面两件事</p>
+<ol>
+<li>对于boss NioEventLoop来说，轮询到的是基本上就是连接事件，后续的事情就通过他的pipeline将连接扔给一个worker NioEventLoop处理</li>
+<li>对于worker NioEventLoop来说，轮询到的基本上都是io读写事件，后续的事情就是通过他的pipeline将读取到的字节流传递给每个channelHandler来处理</li>
+</ol>
+<h2 id="Netty新连接接入的处理"><a href="#Netty新连接接入的处理" class="headerlink" title="Netty新连接接入的处理"></a>Netty新连接接入的处理</h2><p>Netty中每个channel都有一个对应的unsafe，服务端对应的channel的unsafe是 <code>NioMessageUnsafe</code></p>
+<p>当检测到<code>OP_ACCEPT</code>事件时，将调用usafe的read方法</p>
+<pre><code class="java">private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
+    final AbstractNioChannel.NioUnsafe unsafe = ch.unsafe();
+    int readyOps = k.readyOps();
+    if ((readyOps &amp; (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+        unsafe.read();
+    }
+}</code></pre>
+<p>其主要做了下面几件事:</p>
+<ol>
+<li>拿到SeverChannel对应的config，pipeline以及RecvByteBufAllocator.Handler</li>
+<li>循环调用<code>doReadMessage</code>，其在<code>NioServerSocketChannel</code>的实现中主要做的就是读取连接并封装为<code>SocketChannel</code>加入到readBuf中</li>
+<li>逐个交由channelPiplne上的handler进行处理</li>
+<li>清除readBuf，触发ReadComplete事件</li>
+</ol>
+<pre><code class="java">private final class NioMessageUnsafe extends AbstractNioUnsafe {
+
+        private final List&lt;Object&gt; readBuf = new ArrayList&lt;Object&gt;();
+
+        @Override
+        public void read() {
+            assert eventLoop().inEventLoop();
+            final ChannelConfig config = config();
+            final ChannelPipeline pipeline = pipeline();
+            final RecvByteBufAllocator.Handle allocHandle = unsafe().recvBufAllocHandle();
+            allocHandle.reset(config);
+
+            boolean closed = false;
+            Throwable exception = null;
+            try {
+                try {
+                    do {
+                        int localRead = doReadMessages(readBuf);
+                        if (localRead == 0) {
+                            break;
+                        }
+                        if (localRead &lt; 0) {
+                            closed = true;
+                            break;
+                        }
+
+                        allocHandle.incMessagesRead(localRead);
+                    } while (allocHandle.continueReading());
+                } catch (Throwable t) {
+                    exception = t;
+                }
+
+                int size = readBuf.size();
+                for (int i = 0; i &lt; size; i ++) {
+                    readPending = false;
+                    pipeline.fireChannelRead(readBuf.get(i));
+                }
+                readBuf.clear();
+                allocHandle.readComplete();
+                pipeline.fireChannelReadComplete();
+
+                if (exception != null) {
+                    closed = closeOnReadError(exception);
+
+                    pipeline.fireExceptionCaught(exception);
+                }
+
+                if (closed) {
+                    inputShutdown = true;
+                    if (isOpen()) {
+                        close(voidPromise());
+                    }
+                }
+            } finally {
+                // Check if there is a readPending which was not processed yet.
+                // This could be for two reasons:
+                // * The user called Channel.read() or ChannelHandlerContext.read() in channelRead(...) method
+                // * The user called Channel.read() or ChannelHandlerContext.read() in channelReadComplete(...) method
+                //
+                // See https://github.com/netty/netty/issues/2254
+                if (!readPending &amp;&amp; !config.isAutoRead()) {
+                    removeReadOp();
+                }
+            }
+        }
+    }</code></pre>
+<ul>
+<li><p>简化后的Channel继承关系:</p>
+<p>  <img src="/img/Netty_Channel_Extension_Map.webp" srcset="/img/loading.gif" alt=""></p>
+<p>  两大channel，NioServerSocketChannel，NioSocketChannel对应着服务端接受新连接过程和新连接读写过程</p>
+</li>
+<li><p>Pipeline</p>
+<p>  Netty的每个Channel都包含一个pipeline字段，其以HeadContxt为头节点，以TailConext为尾节点，HeadContxt中调用Unsafe做具体的操作，TailConext中用于向用户抛出pipeline中未处理异常以及对未处理消息的警告</p>
+</li>
+</ul>
+<p>在我们对一个ServerBootstrap进行初始化时，其会在piepline中自动添加一个<code>ServerBootstrapAcceptor</code></p>
+<pre><code class="java">p.addLast(new ChannelInitializer&lt;Channel&gt;() {
+            @Override
+            public void initChannel(final Channel ch) {
+                final ChannelPipeline pipeline = ch.pipeline();
+                ChannelHandler handler = config.handler();
+                if (handler != null) {
+                    pipeline.addLast(handler);
+                }
+
+                ch.eventLoop().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        pipeline.addLast(new ServerBootstrapAcceptor(
+                                ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));
+                    }
+                });
+            }
+        });</code></pre>
+<p>其在<code>channelRead</code>方法中将上一个handler传来的msg转化为channel后 将之注册到childEventLoop上，之后该channel的读写都由childEventLoop负责 这里之所以可以直接对Object类型的msg参数直接进行类型转换为Channel类型是因为，OP_ACCEPT事件在NioMessageUnsafe的read处理中会将之包装为一个Channel添加到readBuf列表中，然后对列表中的每个元素依次调用fireChannelRead，也就是说这个msg就是来自那，所以可以直接类型转换</p>
+<pre><code class="java">        @Override
+        @SuppressWarnings(&quot;unchecked&quot;)
+        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            final Channel child = (Channel) msg;
+
+            child.pipeline().addLast(childHandler);
+
+            setChannelOptions(child, childOptions, logger);
+            setAttributes(child, childAttrs);
+
+            try {
+                childGroup.register(child).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (!future.isSuccess()) {
+                            forceClose(child, future.cause());
+                        }
+                    }
+                });
+            } catch (Throwable t) {
+                forceClose(child, t);
+            }
+        }</code></pre>
+<p>在注册socketChannel到childGroup时，需要决定channel绑定到哪一个eventLoop上。默认采用RR的方式，但是netty会判断childGroup的线程数量，如果其是2的幂次方，<br>则采用<code>PowerOfTowEventExecutorChooser</code> 否则采用<code>GenericEventExecutorChooser</code>，前者采用位运算，后者采用余运算</p>
+<pre><code class="java">public final class DefaultEventExecutorChooserFactory implements EventExecutorChooserFactory {
+
+    public static final DefaultEventExecutorChooserFactory INSTANCE = new DefaultEventExecutorChooserFactory();
+
+    private DefaultEventExecutorChooserFactory() { }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public EventExecutorChooser newChooser(EventExecutor[] executors) {
+        if (isPowerOfTwo(executors.length)) {
+            return new PowerOfTowEventExecutorChooser(executors);
+        } else {
+            return new GenericEventExecutorChooser(executors);
+        }
+    }
+
+    private static boolean isPowerOfTwo(int val) {
+        return (val &amp; -val) == val;
+    }
+
+    private static final class PowerOfTowEventExecutorChooser implements EventExecutorChooser {
+        private final AtomicInteger idx = new AtomicInteger();
+        private final EventExecutor[] executors;//EventLoop继承于EventExecutor
+
+        PowerOfTowEventExecutorChooser(EventExecutor[] executors) {
+            this.executors = executors;
+        }
+
+        @Override
+        public EventExecutor next() {
+            return executors[idx.getAndIncrement() &amp; executors.length - 1];
+        }
+    }
+
+    private static final class GenericEventExecutorChooser implements EventExecutorChooser {
+        private final AtomicInteger idx = new AtomicInteger();
+        private final EventExecutor[] executors;
+
+        GenericEventExecutorChooser(EventExecutor[] executors) {
+            this.executors = executors;
+        }
+
+        @Override
+        public EventExecutor next() {
+            return executors[Math.abs(idx.getAndIncrement() % executors.length)];
+        }
+    }
+}</code></pre>
+<p>总的来讲Netty对新连接的处理大致如下:</p>
+<ol>
+<li>boos reactor线程轮询到有新的连接进入</li>
+<li>通过封装jdk底层的channel创建 NioSocketChannel以及一系列的netty核心组件</li>
+<li>将该条连接通过chooser，选择一条worker reactor线程绑定上去</li>
+<li>注册读事件，开始新连接的读写</li>
+</ol>
+<h2 id="ChannelPipeline"><a href="#ChannelPipeline" class="headerlink" title="ChannelPipeline"></a>ChannelPipeline</h2><p>pipeline中的每个节点是一个ChannelHandlerContext对象，每个context节点保存了它包裹的执行器 ChannelHandler 执行操作所需要的上下文，其实就是pipeline，因为pipeline包含了channel的引用，可以拿到所有的context信息</p>
+<p>一条pipeline至少会有两个节点，head和tail</p>
+<p><img src="/img/Netty_pipeline_structure.webp" srcset="/img/loading.gif" alt=""></p>
+<p>pipeline中有两种不同类型的节点，一个是 ChannelInboundHandler，处理inBound事件，最典型的就是读取数据流，加工处理；还有一种类型的Handler是 ChannelOutboundHandler, 处理outBound事件，比如当调用writeAndFlush()类方法时，就会经过该种类型的handler</p>
+<p>在用户代码添加一条handler的时候，首先会查看该handler有没有添加过，netty使用added成员变量标记handler是否已经被添加过，如果非Sharable且已被添加过 那么再次添加就会触发ChannelPipelineException</p>
+<pre><code class="java">private static void checkMultiplicity(ChannelHandler handler) {
+    if (handler instanceof ChannelHandlerAdapter) {
+        ChannelHandlerAdapter h = (ChannelHandlerAdapter) handler;
+        if (!h.isSharable() &amp;&amp; h.added) {
+            throw new ChannelPipelineException(
+                    h.getClass().getName() +
+                    &quot; is not a @Sharable handler, so can&#39;t be added or removed multiple times.&quot;);
+        }
+        h.added = true;
+    }
+}</code></pre>
+<p>isSharable方法的实现 但我并没有想到有什么用ThreadLocalMap的必要，每个Handler又不能动态的生成所以是不是Sharable的状态是固定的，完全可以把所有的Handler的sharable与否都放到一个不可变的以class为键以是否为sharable为值的Map里:</p>
+<p>先不考虑这个，如果必须每次添加handler都执行这个方法的话，那这么做在并发量很大，连接极多的情况下确实能起到一个不小的优化作用，毕竟JAVA中的反射是一个耗时操作</p>
+<p>如果打开注释中的连接，我们可以看到这个issue是在14年的<a href="https://bugs.openjdk.java.net/browse/JDK-7031759" target="_blank" rel="noopener">jdk1.7上</a>的java.lang.Class.initAnnotationsIfNecessary这个方法上发生的，这个方法现在已经被从class中删除了（java13），该方法会锁住class对象，再高并发情况下，将导致大量线程阻塞于isSharable方法</p>
+<p>按照<a href="https://stackoverflow.com/questions/24493816/are-java-lang-class-methods-thread-safe" target="_blank" rel="noopener">StackOverFlow</a>中的回答：</p>
+<blockquote>
+<p>One thread calls isAnnotationPresent on an annotated class where the annotation is not yet initialised for its defining classloader. This will result in a call on AnnotationType.getInstance, locking the class object for sun.reflect.annotation.AnnotationType. getInstance will result in a Class.initAnnotationsIfNecessary for that annotation, trying to acquire a lock on the class object of that annotation.`</p>
+</blockquote>
+<pre><code class="java">    public boolean isSharable() {
+        /**
+         * Cache the result of {@link Sharable} annotation detection to workaround a condition. We use a
+         * {@link ThreadLocal} and {@link WeakHashMap} to eliminate the volatile write/reads. Using different
+         * {@link WeakHashMap} instances per {@link Thread} is good enough for us and the number of
+         * {@link Thread}s are quite limited anyway.
+         *
+         * See &lt;a href=&quot;https://github.com/netty/netty/issues/2289&quot;&gt;#2289&lt;/a&gt;.
+         */
+        Class&lt;?&gt; clazz = getClass();
+        Map&lt;Class&lt;?&gt;, Boolean&gt; cache = InternalThreadLocalMap.get().handlerSharableCache();
+        Boolean sharable = cache.get(clazz);
+        if (sharable == null) {
+            sharable = clazz.isAnnotationPresent(Sharable.class);
+            cache.put(clazz, sharable);
+        }
+        return sharable;
+    }</code></pre>
+<p>定义在<code>Channel</code>接口中的<code>Unsafe</code>中的方法 按功能可以分为分配内存，Socket四元组信息，注册事件循环，绑定网卡端口，Socket的连接和关闭，Socket的读写，看的出来，这些操作都是和jdk底层相关</p>
+<p>Netty中读事件的传递与处理是沿着链表的头节点向尾节点，写事件则反之</p>
+<blockquote>
+<p>AbstractChannelHandlerContext</p>
+</blockquote>
+<pre><code class="java">    private AbstractChannelHandlerContext findContextInbound(int mask) {
+        AbstractChannelHandlerContext ctx = this;
+        do {
+            ctx = ctx.next;
+        } while ((ctx.executionMask &amp; mask) == 0);
+        return ctx;
+    }
+
+    private AbstractChannelHandlerContext findContextOutbound(int mask) {
+        AbstractChannelHandlerContext ctx = this;
+        do {
+            ctx = ctx.prev;
+        } while ((ctx.executionMask &amp; mask) == 0);
+        return ctx;
+    }</code></pre>
+<pre><code class="java">interface Unsafe {
+   RecvByteBufAllocator.Handle recvBufAllocHandle();
+
+   SocketAddress localAddress();
+   SocketAddress remoteAddress();
+
+   void register(EventLoop eventLoop, ChannelPromise promise);
+   void bind(SocketAddress localAddress, ChannelPromise promise);
+   void connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise);
+   void disconnect(ChannelPromise promise);
+   void close(ChannelPromise promise);
+   void closeForcibly();
+   void beginRead();
+   void write(Object msg, ChannelPromise promise);
+   void flush();
+
+   ChannelPromise voidPromise();
+   ChannelOutboundBuffer outboundBuffer();
+}</code></pre>
+<p>继承体系:</p>
+<p><img src="/img/Netty_Unsafe_extensions.webp" srcset="/img/loading.gif" alt=""></p>
+<h2 id="REF"><a href="#REF" class="headerlink" title="REF"></a>REF</h2><p><a href="https://netty.io/wiki/related-articles.html" target="_blank" rel="noopener">Netty官方的developer guide</a> 以及<a href="https://www.jianshu.com/p/0d0eece6d467" target="_blank" rel="noopener">简书的系列文章</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%BA%90%E7%A0%81/Java/">Java</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+                  <span>
+                <i class="iconfont icon-tag"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Netty/">Netty</a>
+                    
+                  </span>
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Netty源码学习2&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
