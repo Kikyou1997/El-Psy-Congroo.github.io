@@ -140,7 +140,7 @@
                   
                   <span class="post-meta">
                       <i class="far fa-clock"></i>
-                      40 分钟
+                      41 分钟
                   </span>
                 
 
@@ -244,9 +244,9 @@ if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUC
 }</code></pre>
 <p>然后会创建库客户端实例</p>
 <pre><code class="java">this.mQClientFactory = MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer, rpcHook);</code></pre>
-<p>整个JVM实例中只会存在一个<code>MQClientManager</code>和一个<code>MQClientInstance</code>实例</p>
+<p>整个JVM实例中只会存在一个<code>MQClientManager</code>实例</p>
 <pre><code class="java">private static MQClientManager instance = new MQClientManager();</code></pre>
-<p>该实例负责维护MQClientInstance缓存表</p>
+<p>该实例采取单例模式实现，负责维护MQClientInstance缓存表</p>
 <pre><code class="java">private ConcurrentMap&lt;String/* clientId */, MQClientInstance&gt; factoryTable = new ConcurrentHashMap&lt;String, MQClientInstance&gt;();</code></pre>
 <p>同一个clientid只创建一个instance clientid=客户端ip+instance+unitName 通过刚才所说的将instance设为默认的client rocketmq会将其instance设置为pid 从而避免在一台物理机上部署多个应用程序时 带来混乱</p>
 <p>之后向clientinstance注册当前的生产者 将当前生产者加入到<code>MQClientInstance</code>中从而方便后续网络请求 心跳检测等 这个<code>MQClientInstance</code>是真正负责和NS等打交道的类 其记录了consunmer集群 producer集群 以及topic的路由信息等等 而<code>DefaultMQProducerImpl</code>最主要的功能则是消息的发送 至于<code>DefaultMQProducer</code>则主要是一些producer的基本配置</p>
@@ -271,7 +271,7 @@ if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUC
 
         return true;
 }</code></pre>
-<p>所以它这个代码逻辑应该是我们可以在一个JVM进程中启动多个属于不同group的producer 但是不能启动多个相同group的producer 否则就会喜提<code>MQClientException</code>异常 告知我们已经创建了该group</p>
+<p>所以它这个代码逻辑应该是我们可以在一个JVM进程（在同一个MQClientInstance中）中启动多个属于不同group的producer 但是不能启动多个相同group的producer 否则就会喜提<code>MQClientException</code>异常 告知我们已经创建了该group</p>
 <p>最后启动MQClientInstance</p>
 <pre><code class="java">if (startFactory) {
                     mQClientFactory.start();
@@ -357,7 +357,7 @@ private TopicRouteData topicRouteData;</code></pre>
 <li>消息发送者会每隔30s向NameServer更新路由信息，如果消息发送端一段时间内未发送消息，就不会有消息发送集群内的第二台Broker，那么NameServer中新创建的Topic的路由信息只会包含Broker-a，然后消息发送者会向NameServer拉取最新的路由信息，此时就会消息发送者原本缓存了2个broker的路由信息，将会变为一个Broker的路由信息，则该Topic的消息永远不会发送到另外一个Broker，就出现了上述现象</li>
 </ol>
 <p>原因就分析到这里了，现在我们还可以的大胆假设，开启autoCreateTopicEnable机制，什么情况会在两个Broker上都创建队列，其实，我们只需要连续快速的发送9条消息，就有可能在2个Broker上都创建队列</p>
-<h4 id="选择消息队列"><a href="#选择消息队列" class="headerlink" title="选择消息队列"></a>选择消息队列</h4><p>消息选择的逻辑在<code>TopicPublishInfo::selectOneMessageQueue</code>中 其<code>lastBrokerName</code>就是上一次选择的执行发送消息失败的broker 第一次调用给方法时<code>lastBrokerName</code>为<code>null</code> 此时直接用<code>sendWhichQueue</code>自增取值 再与队列个数取模 返回该位置MQ 如果消息发送再失败的话下次进行消息队列选择时 规避上次MQ所在的Broker 否则很可能再次会失败</p>
+<h4 id="选择消息队列"><a href="#选择消息队列" class="headerlink" title="选择消息队列"></a>选择消息队列</h4><p>选择消息队列时会调用<code>DefaultMQProducer</code>会调用``MQFaultStrategy::selectOneMessageQueue<code>而该方法实现了对broker的故障延迟机制，然后最终调用</code>TopicPublishInfo::selectOneMessageQueue<code>(该方法代码见下)中 其</code>lastBrokerName<code>就是上一次选择的执行发送消息失败的broker 第一次调用给方法时</code>lastBrokerName<code>为</code>null<code>此时直接用</code>sendWhichQueue`自增取值 再与队列个数取模 返回该位置MQ 如果消息发送再失败的话下次进行消息队列选择时 规避上次MQ所在的Broker 否则很可能再次会失败.</p>
 <pre><code class="java">    public MessageQueue selectOneMessageQueue(final String lastBrokerName) {
         if (lastBrokerName == null) {
             return selectOneMessageQueue();
@@ -460,7 +460,7 @@ public void updateFaultItem(final String brokerName, final long currentLatency, 
 </ul>
 <p>略</p>
 <h2 id="ROCKETMQ-消息存储"><a href="#ROCKETMQ-消息存储" class="headerlink" title="ROCKETMQ 消息存储"></a>ROCKETMQ 消息存储</h2><p>RocketMQ主要存储的文件包括CommitLog ConsumeQueue indexFile文件 RocketMq将所有主题的消息存储在同一个文件中 确保消息发送时顺序写文件 尽最大能力确保消息发送的高性能与高吞吐量</p>
-<p><img src="/img/rocketmq_msg_storage_design.jpg" srcset="/img/loading.gif" alt="rsd"></p>
+<p><img src=".//img/rocketmq_msg_storage_design.jpg" srcset="/img/loading.gif" alt="rsd"></p>
 <p>存储流程比较复杂 在<code>CommitLog::putMessage</code>,<code>MappedFile::appendMessagesInner</code> 以及<code>CommitLog$DefaultAppendMessageCallback::doAppend</code>方法中我们可以了解其最基本流程</p>
 <ol>
 <li><p>如果当前Broker停止工作或为SLAVE角色或当前ROCKETMQ不支持写入或消息主题超过256个字符 或消息属性超过65536个字符 则拒绝写入</p>
@@ -755,6 +755,7 @@ public void updateFaultItem(final String brokerName, final long currentLatency, 
 <li>关于内存锁定 以防止由于内存换页带来的性能暴跌</li>
 </ul>
 <p>可以参见<a href="https://www3.physnet.uni-hamburg.de/physnet/Tru64-Unix/HTML/APS33DTE/DOCU_005.HTM" target="_blank" rel="noopener">这篇文章</a></p>
+<p>本人已将其搬运至本地<a href="../os/memory_locking.md">这里</a></p>
 <p>除了开启<code>transientStoreEnable</code>选项之外 在创建<code>MappedFile</code>时 如果开启了<code>warmMapedFileEnable</code>选项 那么并为其分配内存时会进行所谓的内存预热</p>
 <p>以下关于内存预热的讨论来自<a href="http://tinylcy.me/2019/the-design-of-rocketmq-message-storage-system/" target="_blank" rel="noopener">这位大佬的blog</a></p>
 <p>RocketMQ 利用 mmap 将内核空间的一段内存区域映射至用户空间，映射关系一旦建立，应用程序对这段内存区域的修改可以直接反映到内核空间，反之亦然。相比如 read/write 系统调用，mmap 减少了内核空间和用户空间之间的数据拷贝，在存在大量数据传输的场景下可以有效提升 IO 效率。但是，<strong>通过 mmap 建立内存映射仅是将文件磁盘地址和虚拟地址通过映射对应起来，此时物理内存并没有填充磁盘文件内容。当实际发生文件读写时，产生缺页中断并陷入内核，然后才会将磁盘文件内容读取至物理内存</strong>。(关于这一点 本人特地去查了一下 按照维基百科的说法 In computing, mmap(2) is a POSIX-compliant Unix system call that maps files or devices into memory. It is a method of memory-mapped file I/O. It implements <strong>demand paging</strong>, because file contents are not read from disk directly and initially do not use physical RAM at all. <strong>The actual reads from disk are performed in a “lazy” manner, after a specific location is accessed</strong>. 简单的翻译一下:确实如此 而关于它所提的<strong>demand pafing</strong>:demand paging (as opposed to anticipatory paging) is a method of virtual memory management. In a system that uses demand paging, the operating system copies a disk page into physical memory only if an attempt is made to access it and that page is not already in memory)针对上述场景，RocketMQ 设计了 MappedFile 预热机制。</p>
@@ -830,7 +831,7 @@ private boolean mmapOperation() {
 <p>但是有个小问题–如果consumequeue的创建数量是根据broker设置的每个主题的队列数 且consumequeue的写入 是顺序写入 也就是写完一个consumequeue的文件 再写下一个 而consumer消费时 每个consumequeue只能被同时被一个consumer消费 而这一主题下的其他consumequue文件此时还没有任何数据 那分配到这些consumequeue的consumer这段时间岂不是只能闲着了?</p>
 <p>后续–</p>
 <p>自己试了一下 应该不是顺序写入 主题的consumequeue下的每个文件锁存储的应该都是该主题下的消息的不同部分 但是具体是采用什么算法的目前还不知道</p>
-<p>刚才又研究了一下 具体写入哪个ConsumeQueue似乎是由<code>DispatchRequest</code>中的<code>queueId</code>参数决定的 而这个参数其是由<code>CommitLog::checkMessageAndReturnSize</code>方法设置 而这个方法中设置该字段的值 就是通过读取ByteBuffer中的对应字段 照这么个说法的话 往哪个cconsumequeue中写入是由producer决定的？ 应该是通过设置<code>MessageQueueSelector</code>实现 其可以设置<code>SelectMessageQueueByHash</code>或者<code>SelectMessageQueueByRandom</code>或者<code>SelectMessageQueueByRandom</code>来实现 默认按照<code>MQFaultStrategy</code>的算法来选择一个消息队列进行发送 其通过<code>TopicInfo</code>维护的一个自增字段对总的ConsumeQueue数取余数得到</p>
+<p>刚才又研究了一下 具体写入哪个ConsumeQueue似乎是由<code>DispatchRequest</code>中的<code>queueId</code>参数决定的 而这个参数其是由<code>CommitLog::checkMessageAndReturnSize</code>方法设置 而这个方法中设置该字段的值 就是通过读取ByteBuffer中的对应字段 照这么个说法的话 往哪个cconsumequeue中写入是由producer决定的？ 应该是通过设置<code>MessageQueueSelector</code>实现 其可以设置<code>SelectMessageQueueByHash</code>或者<code>SelectMessageQueueByRandom</code>来实现 默认按照<code>MQFaultStrategy</code>的算法来选择一个消息队列进行发送 其通过<code>TopicInfo</code>维护的一个自增字段对总的ConsumeQueue数取余数得到</p>
 <ul>
 <li>Index索引文件</li>
 </ul>
@@ -923,7 +924,7 @@ private boolean mmapOperation() {
 <li>首先将消息直接追加到堆外的DirectByteBuffer</li>
 <li><code>CommitRealTimeService</code>线程默认每200ms将ByteBuffer新追加的内容的数据提交到<code>MappedByteBuffer</code></li>
 <li><code>MappedByteBuffer</code>在内存中追加提交的内容 <code>wrotePosition</code>向后移动 然后返回</li>
-<li>commit操作咸亨共犯会后 将commitedPosition指针向后移动本次提交的内容长度</li>
+<li>commit操作成功后 将commitedPosition指针向后移动本次提交的内容长度</li>
 <li><code>FlushRealTimeService</code>线程默认每<strong>500ms</strong>将MappedBytebuffer中新追加的内存通过调用<code>MappedByteBuffer::force</code>方法将数据刷到磁盘</li>
 </ol>
 </li>
@@ -936,6 +937,9 @@ private boolean mmapOperation() {
 <li>命令删除</li>
 </ol>
 <p>其通过<code>File::getFreeSpace</code>和<code>File::getTotalSpace</code>计算当前磁盘占用量 一旦占用超过指定值 默认0.85 将会触发立即删除过期文件 如果占用过高默认0.90将拒绝新消息写入</p>
+<h2 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h2><ul>
+<li><a href="http://objcoding.com/2019/07/27/rocketmq-consumer-subscription/" target="_blank" rel="noopener">rocketmq 为什么要保证订阅关系一致性</a></li>
+</ul>
 
             </div>
             <hr>
