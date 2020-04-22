@@ -148,6 +148,54 @@
     
     
     <div class="col-12 col-md-12 mx-auto index-info">
+      <a href="/2020/04/22/BitTorrent%E5%8D%8F%E8%AE%AE/BitTorrent/">
+        <p class="h4 index-header">BitTorrent 协议规范</p>
+      </a>
+
+      <a href="/2020/04/22/BitTorrent%E5%8D%8F%E8%AE%AE/BitTorrent/">
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">BitTorrent 规范翻译自http://bittorrent.org/
+由于本人英语/技术水平有限，可能存在诸多谬误。
+基本组成
+一个普通的web服务器
+一个静态’metainfo’文件
+一个BitTorrent tracker
+一个下载器
+终端用户的web浏览器
+终端用户的的下载器
+
+为了开始服务，一台主机需要经历如下步骤
+运行一个tracker
+运行一个普通的web服务器，如apache等
+Associate the extension .torrent with mimetype application/x-bittorrent on their web server (or ha</div>
+        </div>
+      </a>
+
+      <div class="index-btm">
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2020-04-22&nbsp;&nbsp;
+        
+        
+          <i class="iconfont icon-inbox"></i>
+          
+            <a href="/categories/p2p/">p2p</a>&nbsp;
+          
+            <a href="/categories/p2p/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a>&nbsp;
+          &nbsp;
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
       <a href="/2020/04/04/DDIA%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/ddia/">
         <p class="h4 index-header">DDIA读书笔记</p>
       </a>
@@ -602,59 +650,19 @@ __</div>
     </div>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <div class="col-12 col-md-12 mx-auto index-info">
-      <a href="/2019/03/27/%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index/">
-        <p class="h4 index-header">进程与线程</p>
-      </a>
-
-      <a href="/2019/03/27/%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index/">
-        
-        
-          
-        
-        <div class="index-excerpt" >
-          <div class="index-text mb-1">进程与线程进程正在运行的程序, 一种控制流集合, 集合中至少包括一条执行流, 执行流之间相互独立, 它们共享进程的所有资源
-进程= 线程 + 资源
-进程提供给应用程序的抽象:
-
-一个独立的逻辑控制流(好像程序独占的使用处理器一样)
-一个私有独立的地址空间(好像程序独立的使用内存一样)
-
-虚拟地址空间典型的linux进程虚拟地址空间布局
 
 
-虚拟内存描述符
-
-linux中使用mm_struct来描述进程的虚拟内存空间 该结构体定义在include/linux/mm_types中 下面展示的是简化版本 可以看到其中定义了包括内存区域链表 VMA形成的红黑树 spinlock_t page_tabl</div>
-        </div>
-      </a>
-
-      <div class="index-btm">
-        
-          <i class="iconfont icon-riqi2"></i>&nbsp;2019-03-27&nbsp;&nbsp;
-        
-        
-          <i class="iconfont icon-inbox"></i>
-          
-            <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>&nbsp;
-          &nbsp;
-        
-        
-          <i class="iconfont icon-tag"></i>
-          
-            <a href="/tags/%E4%BB%BB%E5%8A%A1/">任务</a>&nbsp;
-          
-            <a href="/tags/OS/">OS</a>&nbsp;
-          
-        
-      </div>
-    </div>
-  </div>
-
-
+  <nav aria-label="index posts navigation">
+    <span class="pagination pg-blue justify-content-center mt-5" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fas fa-angle-double-right"></i></a>
+    </span>
+  </nav>
+  
+  <script>
+    for (ele of document.getElementById("pagination").getElementsByClassName("page-number")) {
+      ele.href += '#board';
+    }
+  </script>
 
 
 

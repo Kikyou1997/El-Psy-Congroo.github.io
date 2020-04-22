@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="description" content="">
+  <meta name="author" content="Kikyou1997">
+  <meta name="keywords" content="">
+  <title>BitTorrent 协议规范 - Ernst-Neubach&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.13.0/css/mdb.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css" />
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+
+  <link  rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css" />
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+<!-- 自定义样式保持在最底部 -->
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Ernst-Neubach's Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">Archives</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">Categories</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">Tags</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('https://el-psy-congroo.oss-cn-beijing.aliyuncs.com/heart_under_blade.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask rgba-black-light flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+                <p class="mt-3 post-meta">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  Wednesday, April 22nd 2020, 9:08 pm
+                </p>
+              
+
+              <p class="mt-1">
+                
+                  
+                  <span class="post-meta">
+                    <i class="far fa-chart-bar"></i>
+                    3.1k 字
+                  </span>
+                
+
+                
+                  
+                  <span class="post-meta">
+                      <i class="far fa-clock"></i>
+                      12 分钟
+                  </span>
+                
+
+                
+                  <!-- 不蒜子统计文章PV -->
+                  
+                  <span id="busuanzi_container_page_pv" class="post-meta" style="display: none">
+                    <i class="far fa-eye" aria-hidden="true"></i>
+                    <span id="busuanzi_value_page_pv"></span> 次
+                  </span>
+                
+              </p>
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5 z-depth-3" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <div class="markdown-body">
+              <h1 id="BitTorrent-规范"><a href="#BitTorrent-规范" class="headerlink" title="BitTorrent 规范"></a>BitTorrent 规范</h1><p>翻译自<a href="http://bittorrent.org/beps/bep_0003.html" target="_blank" rel="noopener">http://bittorrent.org/</a></p>
+<p>由于本人英语/技术水平有限，可能存在诸多谬误。</p>
+<h2 id="基本组成"><a href="#基本组成" class="headerlink" title="基本组成"></a>基本组成</h2><ul>
+<li>一个普通的web服务器</li>
+<li>一个静态’metainfo’文件</li>
+<li>一个BitTorrent tracker</li>
+<li>一个下载器</li>
+<li>终端用户的web浏览器</li>
+<li>终端用户的的下载器</li>
+</ul>
+<h2 id="为了开始服务，一台主机需要经历如下步骤"><a href="#为了开始服务，一台主机需要经历如下步骤" class="headerlink" title="为了开始服务，一台主机需要经历如下步骤"></a>为了开始服务，一台主机需要经历如下步骤</h2><ol>
+<li>运行一个tracker</li>
+<li>运行一个普通的web服务器，如apache等</li>
+<li>Associate the extension .torrent with mimetype application/x-bittorrent on their web server (or have done so already).、</li>
+<li>生成一个metainfo(.torrent)文件，使该文件可通过url被访问到</li>
+<li>将metainfo文件置于web服务器</li>
+<li>在某个网页上得到该metainf(.torrent)文件的链接</li>
+<li>获得完整的原始文件后开始下载</li>
+</ol>
+<h2 id="为了开始下载，一个用户需要做以下的事"><a href="#为了开始下载，一个用户需要做以下的事" class="headerlink" title="为了开始下载，一个用户需要做以下的事"></a>为了开始下载，一个用户需要做以下的事</h2><ol>
+<li>安装BitTorrent</li>
+<li>开始网上冲浪！</li>
+<li>点击 指向.torrent 文件的链接</li>
+<li>决定保存文件到哪里以及是否恢复尚未完成的下载</li>
+<li>等待下载完成</li>
+<li>关闭下载器并退出(否则其默认会保持上传)</li>
+</ol>
+<h2 id="编码（bencode）"><a href="#编码（bencode）" class="headerlink" title="编码（bencode）"></a>编码（bencode）</h2><ul>
+<li>字符串被标以基于10进制的长度前缀，该长度前缀和字符串间以冒号间隔, 例如与<code>4:spam</code> 相应的<code>spam</code></li>
+<li>整数以 字母i + 十进制数 + 字母e的形式表示， 除了0之外的任何数以0开头都是非法的</li>
+<li>列表被编码以 字母l + 它的元素们 + 字母e，例如与<code>l4:spam4:eggse</code> 相应的是 <code>[&#39;spam&#39;, &#39;eggs&#39;]</code>.</li>
+<li>字典被编码以 字母d + 一个键值对的列表 + 字母e，例如与<code>d3:cow3:moo4:spam4:eggse</code> 对应的是<code>{&#39;cow&#39;: &#39;moo&#39;, &#39;spam&#39;: &#39;eggs&#39;}</code> <code>d4:spaml1:a1:bee</code> 对应的是 <code>{&#39;spam&#39;: [&#39;a&#39;, &#39;b&#39;]}</code>键必须是</li>
+</ul>
+<h2 id="metainfo-文件-torrent文件"><a href="#metainfo-文件-torrent文件" class="headerlink" title="metainfo 文件(.torrent文件)"></a>metainfo 文件(.torrent文件)</h2><p>被编码成一个有如下键的字典。另外，文件中所有的字符串都以utf-8编码</p>
+<ul>
+<li><p>announce</p>
+<p>  Tracker的URL</p>
+</li>
+<li><p>info</p>
+<p>  映射到另一个info字典</p>
+<ul>
+<li><p>info dictionary</p>
+<ul>
+<li>name key  映射到一个建议的目录（下载多个文件）或文件名（单个文件），用以保存文件</li>
+<li>piece length 映射到由每个文件分割而成的小块中的每个小块的字节数。为了进行传输，文件会被分割成固定大小的块，除了最后一个块。通常块大小是2的幂次方。最常见的是most commonly 2的18次方 = 256 K（而BitTorrent3.2版本使用2的20次方=1M作为默认大小）</li>
+<li>pieces 被映射到一个长度是20的整倍数字符串。它被进一步细分为可根据索引访问的每个长度为20的每个piece(块)的sha1hash</li>
+<li>key length或key files 二者仅存在一个。如果是length 那么意味着当前只是下载单个文件，否则代表一个文件集。在单个文件的情况下，长度映射到文件的长度（以字节为单位） 而对于多个文件的情况，通过将各个文件彼此连接 从而作为一个文件对待，而文件列表就是files键所映射的，而该列表又包含如下键: length 文件长度(字节) path(一个utf-8编码的子目录名列表，每个列表的最后一个代表真正的文件名?)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Trackers"><a href="#Trackers" class="headerlink" title="Trackers"></a>Trackers</h2><p>对于Tracker的GET请求有如下的键:(Tracker GET requests have the following keys:)</p>
+<ul>
+<li><p>info_hash</p>
+<p>  bencoded的20字节的基于metainfo文件的info值的sha1 hash 该值必须被转义</p>
+</li>
+<li><p>peer_id</p>
+<p>  长为20的的字符串，下载器以此为其id，每个下载者随机生成其id在新的下载开始的时候，该值必须被转义</p>
+</li>
+<li><p>ip</p>
+<p>  一个可选的参数，给出本端的ip或dns域名</p>
+</li>
+<li><p>port</p>
+<p>  该peer正在监听的端口，通常一个BitTorrent Downloader监听在6881，如果该端口已被占用则逐个向后尝试，6882,6883…</p>
+</li>
+<li><p>uploaded</p>
+<p>  十进制 ascii编码的数，表示目前总的上传量</p>
+</li>
+<li><p>downloaded</p>
+<p>  十进制 ascii编码的数，表示目前总的下载量</p>
+</li>
+<li><p>left</p>
+<p>  十进制 ascii编码的数，表示目前待下载的量。注意该值不能根据已下载的量或者文件长度进行计算，因为如果当前正在进行断点重传，那么如果一些已经下载的数据的完整性校验失败，那么这部分将被重传</p>
+</li>
+<li><p>event</p>
+<p>  可选的key，映射为started, completed, 或stopped 三个状态</p>
+</li>
+</ul>
+<p>Tracker响应以bencoded字典，如果tracker的响应有一个失败的键 那么其将被映射到一个人类可读的字符串用以解释为什么查询失败了，并且不再需要的键。否则响应必须有两个键:</p>
+<ul>
+<li><p>interval</p>
+<p>  映射到一个数字，表示下载器到再次发送请求需要等待的时间</p>
+</li>
+<li><p>peers</p>
+<p>  映射到一个由字典构成的列表，表示其他端点，每个字典包含如下的键 peer id, ip和 port 每个键映射到各自实际的String类型的 ID, IP address or dns name as a string和 端口号</p>
+</li>
+</ul>
+<p>关于Tracker的响应的更多信息可以参见<a href="http://bittorrent.org/beps/bep_0023.html" target="_blank" rel="noopener">bep23</a></p>
+<p>下载器可能会再次发起请求，如果他们需要更多的peers的信息</p>
+<h2 id="Peer-Protocol"><a href="#Peer-Protocol" class="headerlink" title="Peer Protocol"></a>Peer Protocol</h2><p>BitTorrent对端传输协基于TCP或者<a href="http://bittorrent.org/beps/bep_0029.html" target="_blank" rel="noopener">uTP</a>(utorrent Transport Protocol)</p>
+<p>对端连接是双全工的</p>
+<p>协议按照metainfo文件中描述的索引引用文件块，当一端完成了一块(piece)的下载并计算hash是否配，那么他就通知其他peers它已经拥有了这一文件块。</p>
+<p>连接包括2bit用以表示两端的状态，是否阻塞（choked） 是否有兴趣(interested) 前者用以通知在unchoking发生前将不会继续发送数据。</p>
+<p>在有一方感兴趣而另一方没有阻塞(unchoking)的情况，将会进行数据传输。Interest state必须时刻保持- whenever a downloader doesn’t have something they currently would ask a peer for in unchoked, they must express lack of interest, despite being choked.(?不知道想表达啥) Implementing this properly is tricky, but makes it possible for downloaders to know which peers will start downloading immediately if unchoked.</p>
+<p>当数据传输的过程中，下载方应该维护一个队列用以存储对一些piece的请求以得到更好的TCP性能(pipelining)，另一方面，对于不能被立即写入TCP buffer中的请求也应该缓存在队列中，而不是令他们一直保存在应用层网络缓冲中，从而使我们可以在发生阻塞(拥塞)时立刻放弃这些请求。</p>
+<p>后面这部分没太看懂</p>
+<p>The peer wire protocol consists of a handshake followed by a never-ending stream of length-prefixed messages. The handshake starts with character ninteen (decimal) followed by the string ‘BitTorrent protocol’. The leading character is a length prefix, put there in the hope that other new protocols may do the same and thus be trivially distinguishable from each other.</p>
+<p>All later integers sent in the protocol are encoded as four bytes big-endian.</p>
+<p>After the fixed headers come eight reserved bytes, which are all zero in all current implementations. If you wish to extend the protocol using these bytes, please coordinate with Bram Cohen to make sure all extensions are done compatibly.</p>
+<p>Next comes the 20 byte sha1 hash of the bencoded form of the info value from the metainfo file. (This is the same value which is announced as info_hash to the tracker, only here it’s raw instead of quoted here). If both sides don’t send the same value, they sever the connection. The one possible exception is if a downloader wants to do multiple downloads over a single port, they may wait for incoming connections to give a download hash first, and respond with the same one if it’s in their list.</p>
+<p>After the download hash comes the 20-byte peer id which is reported in tracker requests and contained in peer lists in tracker responses. If the receiving side’s peer id doesn’t match the one the initiating side expects, it severs the connection.</p>
+<p>That’s it for handshaking, next comes an alternating stream of length prefixes and messages. Messages of length zero are keepalives, and ignored. Keepalives are generally sent once every two minutes, but note that timeouts can be done much more quickly when data is expected.</p>
+<h2 id="Peer-Messages"><a href="#Peer-Messages" class="headerlink" title="Peer Messages"></a>Peer Messages</h2><p>所有的除了keep-alive包(默认两分钟发送一次)之外所有的消息都有一个字节开始来表示他们的类型</p>
+<p>可能的值包括:</p>
+<ul>
+<li><p>0 - choke</p>
+</li>
+<li><p>1 - unchoke</p>
+</li>
+<li><p>2 - interested</p>
+</li>
+<li><p>3 - not interested</p>
+</li>
+<li><p>4 - have</p>
+<pre><code>  have 消息的payload只有一个简单的数字用来表示当前的下载方刚刚完成下载并hash校验过的块</code></pre></li>
+<li><p>5 - bitfield</p>
+<pre><code>  该类型的消息只会作为第一条消息发送，他的payload是一个位域按如下规则表示：当前downloader已经拥有的块索引，置为1，尚未拥有的则置为0.如果当前的downloader尚未保有任何块，则可以跳过发送这条消息。其payload的第一个字节的位域从高为到低位分别代表块0-7，如果还有下一次字节那么就是8-15 以此类推，至于末尾多余的位则被置0</code></pre></li>
+<li><p>6 - request</p>
+<pre><code>  requset消息包括一个索引，起始偏移量和长度(长度通常是2的幂次方 除非它被EOF截断)</code></pre></li>
+<li><p>7 - piece</p>
+<pre><code>  该类型的消息由索引，起始位置和块组成，注意他们和request消息类型存在隐含的关系。</code></pre></li>
+<li><p>8 - cancel</p>
+<pre><code>  与request消息拥有一样的payload，他们通常在下载即将完成的时候发送（ They are generally only sent towards the end of a download, during what&#39;s called &#39;endgame mode&#39;.） 当一次下载已经几乎完成的时候，当前下在方会向所有其他节点发送最后的尚未下载的块，那么将导致，其他所有节点向下载方同时传输同样的块，但是实际上该块的下载可能已经即将完成，这就导致带宽的利用效率低下，为了避免这种情况，他会在所请求的piece已经到达时向其他节点发送cancel消息。(When a download is almost complete, there&#39;s a tendency for the last few pieces to all be downloaded off a single hosed modem line, taking a very long time. To make sure the last few pieces come in quickly, once requests for all pieces a given downloader doesn&#39;t have yet are currently pending, it sends requests for everything to everyone it&#39;s downloading from. To keep this from becoming horribly inefficient, it sends cancels to everyone else every time a piece arrives.)</code></pre></li>
+</ul>
+<p>下载方通常会以随机顺序下载块，这样可以很好的防止其拥有他们节点所拥有的块的严格子集或超集(Downloaders generally download pieces in random order, which does a reasonably good job of keeping them from having a strict subset or superset of the pieces of any of their peers. 个人的理解是，对于某个(批)文件,可能不同的节点保存有不同部分的块，通过从多个节点随机下载，使得最后下载方最后仍能够得到完成的原文件)</p>
+<p>阻塞(Choking)发生的原因，如TCP拥塞控制在立刻同时在很多连接发送数据的情况下表现的很糟</p>
+<p>Choking机制使得每个节点使用<code>tit-for-tat-ish</code>算法(titi-for-tat 可理解为 等价的 以牙还牙的等 ish在这里是形容词后缀)来保证他们有一个相对一致的下载速率</p>
+<p>一个好的choking算法应该满足以下几种特质：</p>
+<ol>
+<li>限制同时进行上传的连接数量来保证tcp传输性能</li>
+<li>避免过于频繁的choking和unchoking（这种现象也被成为fibrillation 颤动）</li>
+<li>对于贡献上传量的节点应该给予一定的奖励机制</li>
+<li>如果对于当前的下载有多条连接可用，应该间歇性检查是否存在比当前正在使用的连接更优的连接</li>
+</ol>
+<p>当前部署的choking算法通过每10s改变一次当前处于choked状态的节点来避免颤动；通常开放4个拥有最好的下载速度的节点来奖励上传者；当前拥有较好的上传速率而没有被interested的节点优先unchoked，一旦他们成为了下载方的interested那么最差上传速率的节点将被choked；如果一个下载方拥有一份完整的文件，那么他根据他的上传速率而不是下载速率来决定unchoke的节点</p>
+<p>为了优化unchoking，在任何时刻每30s都会轮流有一个节点unchoked无论他的上传速率如何，以使他们得到正当的机会去上传。新的连接得到unchoke的几率是其他当前正在轮流unchoke节点的3倍。</p>
+<p>更多内容可见<a href="http://bittorrent.org/bittorrentecon.pdf" target="_blank" rel="noopener">原论文</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <p>
+                
+                  <span>
+                <i class="iconfont icon-inbox"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/p2p/">p2p</a>
+                      &nbsp;
+                    
+                      <a class="hover-with-bg" href="/categories/p2p/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a>
+                      &nbsp;
+                    
+                  </span>&nbsp;&nbsp;
+                
+                
+              </p>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc-start"></div>
+<div id="toc">
+  <p class="h5"><i class="far fa-list-alt"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><b>Hexo</b></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"> <b>Fluid</b></a>
+    </div>
+    
+  <div>
+    
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/popper.js/1.16.1/umd/popper.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.staticfile.org/mdbootstrap/4.13.0/js/mdb.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.10.0/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var navHeight = $('#navbar').height();
+      var post = $('#post');
+      var toc = $('#toc');
+      var tocLimMax = post.offset().top + post.height() - navHeight;
+
+      $(window).scroll(function () {
+        var tocLimMin = $('#toc-start').offset().top - navHeight;
+        var scroH = document.body.scrollTop + document.documentElement.scrollTop;
+
+        if (tocLimMin <= scroH && scroH <= tocLimMax) {
+          toc.css({
+            'display': 'block',
+            'position': 'fixed',
+            'top': navHeight,
+          });
+        } else if (scroH <= tocLimMin) {
+          toc.css({
+            'position': '',
+            'top': '',
+          });
+        } else if (scroH > tocLimMax) {
+          toc.css('display', 'none');
+        }
+      });
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        scrollSmooth: true,
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc > p').css('visibility', 'visible');
+      }
+      var offset = $('#board-ctn').css('margin-right')
+      $('#toc-ctn').css({
+        'right': offset
+      })
+    });
+  </script>
+
+
+
+
+
+
+
+  <script defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/prettify/188.0.0/prettify.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "BitTorrent 协议规范&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script>
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(
+      function () {
+        var element = document.createElement("a");
+        $(element).attr("data-fancybox", "images");
+        $(element).attr("href", $(this).attr("src"));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
